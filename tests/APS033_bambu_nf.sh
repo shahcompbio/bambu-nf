@@ -13,7 +13,7 @@ mkdir -p ${outdir}
 cd ${outdir}
 
 nextflow run ${pipelinedir}/main.nf \
-    -profile local \
+    -profile singularity \
     -work-dir ${outdir}/work \
     --outdir ${outdir} \
     --input ${samplesheet} \

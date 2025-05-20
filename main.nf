@@ -52,7 +52,7 @@ workflow SHAHCOMPBIO_BAMBU_NF {
         samplesheet
     )
     emit:
-    multiqc_report = BAMBU-NF.out.multiqc_report // channel: /path/to/multiqc_report.html
+    multiqc_report = BAMBU_NF.out.multiqc_report // channel: /path/to/multiqc_report.html
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -78,7 +78,7 @@ workflow {
     //
     // WORKFLOW: Run main workflow
     //
-    SHAHCOMPBIO_BAMBU-NF (
+    SHAHCOMPBIO_BAMBU_NF (
         PIPELINE_INITIALISATION.out.samplesheet
     )
     //
@@ -91,7 +91,7 @@ workflow {
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        SHAHCOMPBIO_BAMBU-NF.out.multiqc_report
+        SHAHCOMPBIO_BAMBU_NF.out.multiqc_report
     )
 }
 
