@@ -13,7 +13,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { BAMBU-NF  } from './workflows/bambu-nf'
+include { BAMBU_NF  } from './workflows/bambu'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_bambu-nf_pipeline'
 include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_bambu-nf_pipeline'
 include { getGenomeAttribute      } from './subworkflows/local/utils_nfcore_bambu-nf_pipeline'
@@ -38,7 +38,7 @@ params.fasta = getGenomeAttribute('fasta')
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
-workflow SHAHCOMPBIO_BAMBU-NF {
+workflow SHAHCOMPBIO_BAMBU_NF {
 
     take:
     samplesheet // channel: samplesheet read in from --input
@@ -48,7 +48,7 @@ workflow SHAHCOMPBIO_BAMBU-NF {
     //
     // WORKFLOW: Run pipeline
     //
-    BAMBU-NF (
+    BAMBU_NF (
         samplesheet
     )
     emit:
