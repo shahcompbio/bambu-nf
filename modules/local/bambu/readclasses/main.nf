@@ -1,7 +1,8 @@
 // create read classes with bambu
 process BAMBU_READCLASSES {
     tag "${meta.id}"
-    label 'process_high_memory'
+    // temporary label for testing
+    label 'process_single'
     publishDir "${params.outdir}/${meta.id}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"

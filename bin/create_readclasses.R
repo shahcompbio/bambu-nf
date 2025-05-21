@@ -1,17 +1,4 @@
 #!/usr/bin/env Rscript
-
-### define directory creation function
-create_directory <- function(bambu_out) {
-  if (!dir.exists(bambu_out)) {
-    dir.create(bambu_out)
-    print(paste("Directory created at", bambu_out))
-  } else {
-    print("Directory already exists")
-  }
-}
-
-##########
-## prepare data
 library(bambu)
 ## load in commandline args
 args = commandArgs(trailingOnly=TRUE)
