@@ -17,4 +17,5 @@ nextflow run ${pipelinedir}/main.nf \
     -work-dir ${outdir}/work \
     --outdir ${outdir} \
     --input ${samplesheet} \
+    --filter_acc_reads \
     -resume

@@ -241,5 +241,11 @@
         {
             "$ref": "#/$defs/generic_options"
         }
-    ]
+    ],
+    "properties": {
+        "filter_acc_reads": {
+            "type": "boolean",
+            "description": "filter reads on accessory chromosomes; sometimes causes issues for bambu"
+        }
+    }
 }

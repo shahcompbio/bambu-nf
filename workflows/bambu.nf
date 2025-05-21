@@ -27,9 +27,13 @@ workflow BAMBU_NF {
     //
     // MODULE: Run samtools view to filter bam files for reads aligned to accessory chromosomes
     //
-    SAMTOOLS_VIEW (
-        ch_samplesheet, [[], []], [], "bai"
-    )
+    if (params.filter_acc_reads) {
+        SAMTOOLS_VIEW (
+            ch_samplesheet, [[], []], [], "bai"
+        )
+    }
+    
+
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
 
