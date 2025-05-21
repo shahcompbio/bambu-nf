@@ -248,7 +248,7 @@
             "description": "filter reads on accessory chromosomes; sometimes causes issues for bambu"
         },
         "yieldsize": {
-            "type": "integer",
+            "type": "string",
             "default": 100000,
             "description": "Number of reads to process; lower helps with memory"
         },

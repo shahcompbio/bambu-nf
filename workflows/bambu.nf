@@ -29,20 +29,21 @@ workflow BAMBU_NF {
     // MODULE: Run samtools view to filter bam files for reads aligned to accessory chromosomes
     //
     if (params.filter_acc_reads) {
-        ch_filtered_bam = SAMTOOLS_VIEW(
+        ch_filtered = SAMTOOLS_VIEW(
             ch_samplesheet,
             [[], []],
             [],
             "bai",
         )
+        ch_filtered.bam.view()
         ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
     }
     // create read classes with bambu
     rc_ch = BAMBU_READCLASSES(
-        ch_filtered_bam,
+        ch_filtered.bam,
         params.yieldsize,
-        params.ref_genome,
-        params.ref_gtf,
+        params.fasta,
+        params.gtf,
     )
     ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
