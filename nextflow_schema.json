@@ -246,6 +246,15 @@
         "filter_acc_reads": {
             "type": "boolean",
             "description": "filter reads on accessory chromosomes; sometimes causes issues for bambu"
+        },
+        "yieldsize": {
+            "type": "integer",
+            "default": 100000,
+            "description": "Number of reads to process; lower helps with memory"
+        },
+        "gtf": {
+            "type": "string",
+            "description": "reference transcriptome"
         }
     }
 }
