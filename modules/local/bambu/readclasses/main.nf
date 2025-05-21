@@ -27,7 +27,7 @@ process BAMBU_READCLASSES {
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    create_readclasses.r \\
+    create_readclasses.R \\
         --bam ${bam} \\
         --yieldsize ${yieldsize} \\
         --ref_genome ${ref_genome} \\
