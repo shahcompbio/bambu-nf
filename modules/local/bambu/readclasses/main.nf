@@ -28,10 +28,10 @@ process BAMBU_READCLASSES {
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     create_readclasses.R \\
-        --bam ${bam} \\
-        --yieldsize ${yieldsize} \\
-        --ref_genome ${ref_genome} \\
-        --ref_gtf ${ref_gtf}
+        --bam=${bam} \\
+        --yieldsize=${yieldsize} \\
+        --ref_genome=${ref_genome} \\
+        --ref_gtf=${ref_gtf}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
