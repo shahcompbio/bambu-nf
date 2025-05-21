@@ -1,4 +1,14 @@
 #!/bin/bash
+#SBATCH --partition=cpu_short
+#SBATCH --account=shahs3
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=2
+#SBATCH --time=1:00:00
+#SBATCH --mem=20GB
+#SBATCH --job-name=bambu
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=preskaa@mskcc.org
+#SBATCH --output=slurm%j_bambu.out
 
 ## activate nf-core conda environment
 source /home/preskaa/miniforge3/bin/activate nf-core
@@ -14,6 +24,8 @@ gtf=/data1/shahs3/isabl_data_lake/assemblies/GRCh38-P14/gencode.v45.primary_asse
 mkdir -p ${outdir}
 cd ${outdir}
 
+# export NXF_SINGULARITY_OPTS="--bind /data1/shahs3:/data1/shahs3"
+
 nextflow run ${pipelinedir}/main.nf \
     -profile singularity \
     -work-dir ${outdir}/work \
@@ -22,4 +34,4 @@ nextflow run ${pipelinedir}/main.nf \
     --filter_acc_reads \
     --fasta ${fasta} \
     --gtf ${gtf} \
-    -resume
+    #-resume

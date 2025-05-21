@@ -11,8 +11,8 @@ process BAMBU_READCLASSES {
     input:
     tuple val(meta), path(bam)
     val yieldsize
-    val ref_genome
-    val ref_gtf
+    path ref_genome
+    path ref_gtf
 
     output:
     // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
