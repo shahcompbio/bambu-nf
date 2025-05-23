@@ -1,7 +1,7 @@
 // filter for full-length isoforms
 process BAMBU_FILTER {
     tag "${meta.id}"
-    label 'process_single'
+    label 'process_low'
     publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${params.NDR}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"

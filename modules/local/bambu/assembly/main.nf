@@ -3,7 +3,7 @@
 process BAMBU_ASSEMBLY {
     tag "${meta.id}"
     // for testing purposes
-    label 'process_single'
+    label 'process_high_memory'
     publishDir "${params.outdir}/${meta.id}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"
