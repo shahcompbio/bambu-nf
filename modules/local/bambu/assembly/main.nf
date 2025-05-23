@@ -6,7 +6,7 @@ process BAMBU_ASSEMBLY {
     publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${task.ext.args}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"
-    container "quay.io/shahlab_singularity/bambu:3.10.0"
+    container "quay.io/shahlab_singularity/bambu:3.10.0beta"
 
     input:
     tuple val(meta), path(rds)
