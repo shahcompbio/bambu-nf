@@ -24,7 +24,7 @@ process BAMBU_ASSEMBLY {
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: ''
+    def args = task.ext.args ?: 'NULL'
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
     transcript_assembly.R \\ 

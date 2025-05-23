@@ -38,7 +38,8 @@ workflow BAMBU_NF {
         )
         ch_bam = ch_filtered.bam
         ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
-    } else {
+    }
+    else {
         ch_bam = ch_samplesheet.map { meta, bam, bai -> tuple(meta, bam) }
     }
     ch_bam.view()
