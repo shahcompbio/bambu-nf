@@ -1,7 +1,8 @@
 // transcript assembly with bambu
 process BAMBU_ASSEMBLY {
     tag "${meta.id}"
-    label 'process_high_memory'
+    // for testing purposes
+    label 'process_single'
     publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${task.ext.args}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"
