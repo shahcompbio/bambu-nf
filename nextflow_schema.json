@@ -65,6 +65,10 @@
                     "help_text": "This parameter is *mandatory* if `--genome` is not specified. If you don't have a BWA index available this will be generated for you automatically. Combine with `--save_reference` to save BWA index for future runs.",
                     "fa_icon": "far fa-file-code"
                 },
+                "gtf": {
+                    "type": "string",
+                    "description": "Path to reference transcriptome"
+                },
                 "igenomes_ignore": {
                     "type": "boolean",
                     "description": "Do not load the iGenomes reference config.",
@@ -226,6 +230,28 @@
                     "hidden": true
                 }
             }
+        },
+        "bambu_parameters": {
+            "title": "Bambu parameters",
+            "type": "object",
+            "description": "parameters for transcript assembly",
+            "default": "",
+            "properties": {
+                "filter_acc_reads": {
+                    "type": "boolean",
+                    "description": "filter reads on accessory chromosomes; sometimes causes issues for bambu"
+                },
+                "NDR": {
+                    "type": "number",
+                    "default": 0.1,
+                    "description": "set novel discovery rate for Bambu"
+                },
+                "yieldsize": {
+                    "type": "number",
+                    "default": 100000,
+                    "description": "Number of reads to process; lower helps with memory"
+                }
+            }
         }
     },
     "allOf": [
@@ -240,25 +266,9 @@
         },
         {
             "$ref": "#/$defs/generic_options"
+        },
+        {
+            "$ref": "#/$defs/bambu_parameters"
         }
-    ],
-    "properties": {
-        "filter_acc_reads": {
-            "type": "boolean",
-            "description": "filter reads on accessory chromosomes; sometimes causes issues for bambu"
-        },
-        "yieldsize": {
-            "type": "number",
-            "default": 100000,
-            "description": "Number of reads to process; lower helps with memory"
-        },
-        "gtf": {
-            "type": "string",
-            "description": "reference transcriptome"
-        },
-        "NDR": {
-            "type": "number",
-            "default": 0.1
-        }
-    }
+    ]
 }
