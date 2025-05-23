@@ -35,12 +35,15 @@ workflow BAMBU_NF {
             [],
             "bai",
         )
-        ch_filtered.bam.view()
+        ch_bam = ch_filtered.bam
         ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
+    } else {
+        ch_bam = ch_samplesheet.map { meta, bam, bai -> tuple(meta, bam) }
     }
+    ch_bam.view()
     // create read classes with bambu
     rc_ch = BAMBU_READCLASSES(
-        ch_filtered.bam,
+        ch_bam,
         params.yieldsize,
         params.fasta,
         params.gtf,
