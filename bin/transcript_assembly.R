@@ -12,7 +12,7 @@ option_list = list(
   make_option(c("--ref_genome"), type="character", default=NULL, 
               help="reference genome", metavar="character"),
   make_option(c("--ref_gtf"), type="character", default=NULL, 
-              help="reference gtf", metavar="character"),
+              help="reference gtf", metavar="character")
 ); 
  
 opt_parser = OptionParser(option_list=option_list);
