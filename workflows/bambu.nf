@@ -43,7 +43,6 @@ workflow BAMBU_NF {
     else {
         ch_bam = ch_samplesheet.map { meta, bam, bai -> tuple(meta, bam) }
     }
-    ch_bam.view()
     // create read classes with bambu
     rc_ch = BAMBU_READCLASSES(
         ch_bam,
