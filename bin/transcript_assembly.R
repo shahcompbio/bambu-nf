@@ -3,17 +3,17 @@ library(bambu)
 library(optparse)
 ## load in commandline args
 option_list = list(
-  make_option(c("--rds"), type="character", default=NULL, 
+  make_option("--rds", type="character", default=NULL, 
               help="bambu read classes", metavar="character"),
-  make_option(c("--yieldsize"), type="character", default="1000000", 
+  make_option("--yieldsize", type="character", default="1000000", 
               help="limits number of reads processed at once", metavar="character"),
-  make_option(c("--NDR"), type="character", default=NULL, 
+  make_option("--NDR", type="character", default=NULL, 
               help="bambu NDR; modulates FDR", metavar="character"),
-  make_option(c("--ref_genome"), type="character", default=NULL, 
+  make_option("--ref_genome", type="character", default=NULL, 
               help="reference genome", metavar="character"),
-  make_option(c("--ref_gtf"), type="character", default=NULL, 
+  make_option("--ref_gtf", type="character", default=NULL, 
               help="reference gtf", metavar="character")
-); 
+);
  
 opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
