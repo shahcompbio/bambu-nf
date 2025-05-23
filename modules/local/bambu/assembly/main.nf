@@ -1,9 +1,10 @@
 // transcript assembly with bambu
+// NOTE: be warying of errant spaces in the script section! optparse will be unhappy
 process BAMBU_ASSEMBLY {
     tag "${meta.id}"
     // for testing purposes
     label 'process_single'
-    publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${task.ext.args}", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.id}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"
     container "quay.io/shahlab_singularity/bambu:3.10.0beta"
@@ -11,28 +12,31 @@ process BAMBU_ASSEMBLY {
     input:
     tuple val(meta), path(rds)
     val yieldsize
+    val NDR
     path ref_genome
     path ref_gtf
 
     output:
-    // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    tuple val(meta), path("*.bam"), emit: bam
-    // TODO nf-core: List additional required output channels/values here
+    tuple val(meta), path("*/se.RData"), emit: se
+    tuple val(meta), path("transcriptome_*"), emit: bambu_out
     path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def args = task.ext.args ?: 'NULL'
+    def NDR_args = NDR ? "--NDR=${NDR}" : ""
+    def out_dir = NDR ? "transcriptome_NDR_${NDR}" : "transcriptome_NDR_DEFAULT"
     def prefix = task.ext.prefix ?: "${meta.id}"
     """
-    transcript_assembly.R \\ 
-        --rds=${rds} \\ 
-        --yieldsize=${yieldsize} \\ 
-        --ref_genome=${ref_genome} \\ 
-        --ref_gtf=${ref_gtf} \\ 
-        --NDR=${args}
+    mkdir -p ${out_dir}
+    transcript_assembly.R \\
+        --rds=${rds} \\
+        --yieldsize=${yieldsize} \\
+        --ref_genome=${ref_genome} \\
+        --ref_gtf=${ref_gtf} \\
+        --out_dir=${out_dir} \\
+        ${NDR_args}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')

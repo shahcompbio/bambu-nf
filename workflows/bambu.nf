@@ -5,7 +5,7 @@
 */
 include { SAMTOOLS_VIEW                   } from '../modules/nf-core/samtools/view/main'
 include { BAMBU_READCLASSES               } from '../modules/local/bambu/readclasses/main'
-include { BAMBU_ASSEMBLY as BAMBU_NDR_PT1 } from '../modules/local/bambu/assembly/main'
+include { BAMBU_ASSEMBLY; BAMBU_ASSEMBLY as BAMBU_NDR } from '../modules/local/bambu/assembly/main'
 include { MULTIQC                         } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap                } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -52,14 +52,23 @@ workflow BAMBU_NF {
     )
     ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
     // perform assembly & quantification with bambu
-    ch_assembly = BAMBU_NDR_PT1(
+    ch_bambu_default = BAMBU_ASSEMBLY(
         rc_ch.rds,
         params.yieldsize,
+        [],
+        params.fasta,
+        params.gtf,
+    )
+    ch_versions = ch_versions.mix(BAMBU_ASSEMBLY.out.versions)
+    ch_bambu_ndr = BAMBU_NDR(
+        rc_ch.rds,
+        params.yieldsize,
+        params.NDR,
         params.fasta,
         params.gtf,
     )
     // filter for detected transcripts
-    ch_versions = ch_versions.mix(BAMBU_NDR_PT1.out.versions)
+    ch_versions = ch_versions.mix(BAMBU_NDR.out.versions)
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     //
     // Collate and save software versions

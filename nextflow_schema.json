@@ -248,13 +248,17 @@
             "description": "filter reads on accessory chromosomes; sometimes causes issues for bambu"
         },
         "yieldsize": {
-            "type": "string",
+            "type": "number",
             "default": 100000,
             "description": "Number of reads to process; lower helps with memory"
         },
         "gtf": {
             "type": "string",
             "description": "reference transcriptome"
+        },
+        "NDR": {
+            "type": "number",
+            "default": 0.1
         }
     }
 }
