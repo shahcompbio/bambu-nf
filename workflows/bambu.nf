@@ -3,13 +3,14 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { SAMTOOLS_VIEW          } from '../modules/nf-core/samtools/view/main'
-include { BAMBU_READCLASSES      } from '../modules/local/bambu/readclasses/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
+include { SAMTOOLS_VIEW                   } from '../modules/nf-core/samtools/view/main'
+include { BAMBU_READCLASSES               } from '../modules/local/bambu/readclasses/main'
+include { BAMBU_ASSEMBLY as BAMBU_NDR_PT1 } from '../modules/local/bambu/assembly/main'
+include { MULTIQC                         } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc            } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText          } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,6 +46,14 @@ workflow BAMBU_NF {
         params.fasta,
         params.gtf,
     )
+    // perform assembly & quantification with bambu
+    ch_assembly = BAMBU_NDR_PT1(
+        rc_ch,
+        params.yieldsize,
+        params.fasta,
+        params.gtf,
+    )
+    // filter for detected transcripts
     ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     //
