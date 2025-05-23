@@ -49,15 +49,16 @@ workflow BAMBU_NF {
         params.fasta,
         params.gtf,
     )
+    ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
     // perform assembly & quantification with bambu
     ch_assembly = BAMBU_NDR_PT1(
-        rc_ch,
+        rc_ch.rds,
         params.yieldsize,
         params.fasta,
         params.gtf,
     )
     // filter for detected transcripts
-    ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
+    ch_versions = ch_versions.mix(BAMBU_NDR_PT1.out.versions)
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     //
     // Collate and save software versions

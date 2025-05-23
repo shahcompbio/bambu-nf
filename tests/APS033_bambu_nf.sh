@@ -33,4 +33,4 @@ nextflow run ${pipelinedir}/main.nf \
     --input ${samplesheet} \
     --fasta ${fasta} \
     --gtf ${gtf} \
-   # -resume
+    -resume
