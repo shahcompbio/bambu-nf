@@ -52,14 +52,17 @@ workflow BAMBU_NF {
     )
     ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
     // perform assembly & quantification with bambu
-    ch_bambu_default = BAMBU_ASSEMBLY(
-        rc_ch.rds,
-        params.yieldsize,
-        [],
-        params.fasta,
-        params.gtf,
-    )
-    ch_versions = ch_versions.mix(BAMBU_ASSEMBLY.out.versions)
+    if (params.recommended_NDR) {
+        ch_bambu_default = BAMBU_ASSEMBLY(
+            rc_ch.rds,
+            params.yieldsize,
+            [],
+            params.fasta,
+            params.gtf,
+        )
+        ch_versions = ch_versions.mix(BAMBU_ASSEMBLY.out.versions)
+    }
+    // run at fixed NDR
     ch_bambu_ndr = BAMBU_NDR(
         rc_ch.rds,
         params.yieldsize,
