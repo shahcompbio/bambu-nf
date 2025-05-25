@@ -3,15 +3,15 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { SAMTOOLS_VIEW               } from '../modules/nf-core/samtools/view/main'
-include { BAMBU_READCLASSES           } from '../modules/local/bambu/readclasses/main'
+include { SAMTOOLS_VIEW ; SAMTOOLS_VIEW as FILTER_READS } from '../modules/nf-core/samtools/view/main'
+include { BAMBU_READCLASSES             } from '../modules/local/bambu/readclasses/main'
 include { BAMBU_ASSEMBLY ; BAMBU_ASSEMBLY as BAMBU_NDR } from '../modules/local/bambu/assembly/main'
-include { BAMBU_FILTER                } from '../modules/local/bambu/filter/main'
-include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap            } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML      } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText      } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
+include { BAMBU_FILTER                  } from '../modules/local/bambu/filter/main'
+include { MULTIQC                       } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap              } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText        } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -30,7 +30,17 @@ workflow BAMBU_NF {
     //
     // MODULE: Run samtools view to filter bam files for reads aligned to accessory chromosomes
     //
-    if (params.filter_acc_reads) {
+    if (params.filter_reads) {
+        ch_filtered = FILTER_READS(
+            ch_samplesheet,
+            [[], []],
+            [],
+            "bai",
+        )
+        ch_bam = ch_filtered.bam
+        ch_versions = ch_versions.mix(FILTER_READS.out.versions.first())
+    }
+    else if (params.filter_acc_reads) {
         ch_filtered = SAMTOOLS_VIEW(
             ch_samplesheet,
             [[], []],

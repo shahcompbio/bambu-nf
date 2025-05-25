@@ -231,16 +231,28 @@
                 }
             }
         },
+        "read_filtering": {
+            "title": "Read filtering",
+            "type": "object",
+            "description": "pre-filter reads before assembly",
+            "default": "",
+            "properties": {
+                "filter_reads": {
+                    "type": "boolean",
+                    "description": "pre-filter reads for qual >=10 and length >= 500"
+                },
+                "filter_acc_reads": {
+                    "type": "boolean",
+                    "description": "filter reads on accessory chromosomes; sometimes causes issues for bambu"
+                }
+            }
+        },
         "bambu_parameters": {
             "title": "Bambu parameters",
             "type": "object",
             "description": "parameters for transcript assembly",
             "default": "",
             "properties": {
-                "filter_acc_reads": {
-                    "type": "boolean",
-                    "description": "filter reads on accessory chromosomes; sometimes causes issues for bambu"
-                },
                 "NDR": {
                     "type": "number",
                     "default": 0.1,
@@ -271,6 +283,9 @@
         },
         {
             "$ref": "#/$defs/generic_options"
+        },
+        {
+            "$ref": "#/$defs/read_filtering"
         },
         {
             "$ref": "#/$defs/bambu_parameters"
