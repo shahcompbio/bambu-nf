@@ -239,7 +239,17 @@
             "properties": {
                 "filter_reads": {
                     "type": "boolean",
-                    "description": "pre-filter reads for qual >=10 and length >= 500"
+                    "description": "pre-filter reads using mapq and read length"
+                },
+                "mapq": {
+                    "type": "integer",
+                    "default": 20,
+                    "description": "min mapq for read filtering"
+                },
+                "read_len": {
+                    "type": "integer",
+                    "default": 500,
+                    "description": "min read length for read filtering"
                 },
                 "filter_acc_reads": {
                     "type": "boolean",
