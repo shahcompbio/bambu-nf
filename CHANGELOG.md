@@ -13,9 +13,3 @@ Initial release of shahcompbio/bambu-nf, created with the [nf-core](https://nf-c
 - Flags to pre-filter reads before assembly on read length & mapq (useful for samples with inadequate QC)
 - Flags to pre-filter reads on accessory chromosomes (can sometimes cause issues for Bambu)
 - Flag to adjust NDR in bambu
-
-### `Fixed`
-
-### `Dependencies`
-
-### `Deprecated`
