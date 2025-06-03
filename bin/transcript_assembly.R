@@ -9,6 +9,10 @@ option_list = list(
               help="limits number of reads processed at once", metavar="character"),
   make_option("--NDR", type="numeric", default=NULL, 
               help="bambu NDR; modulates FDR", metavar="character"),
+  make_option("--quant", type="logical", default=TRUE, 
+              help="whether to run quantification", metavar="logical"),
+  make_option("--ncore", type="numeric", default=1, 
+              help="number of threads", metavar="numeric"),
   make_option("--ref_genome", type="character", default=NULL, 
               help="reference genome", metavar="character"),
   make_option("--ref_gtf", type="character", default=NULL, 
@@ -22,9 +26,9 @@ opt = parse_args(opt_parser);
 # This function creates a reference annotation object which is used for transcript discovery and quantification in Bambu.
 annotations <- prepareAnnotations(opt$ref_gtf)
 ####################
-se <- bambu(reads = opt$rds, annotations = annotations, ncore = 1,
-            genome = opt$ref_genome, NDR = opt$NDR, verbose=TRUE, 
-            yieldSize = opt$yieldsize, lowMemory=TRUE)
+se <- bambu(reads = opt$rds, annotations = annotations, ncore = opt$ncore,
+            genome = opt$ref_genome, NDR = opt$NDR, verbose=TRUE,
+            quant = opt$quant, yieldSize = opt$yieldsize, lowMemory=TRUE)
 ## write outputs to gtf and expression level files
 writeBambuOutput(se, path = opt$out_dir)
 #

@@ -10,7 +10,7 @@ process BAMBU_ASSEMBLY {
     container "quay.io/shahlab_singularity/bambu:3.10.0beta"
 
     input:
-    tuple val(meta), path(rds)
+    tuple val(meta), path(rds, arity: '1..*')
     val yieldsize
     val NDR
     path ref_genome
@@ -28,6 +28,7 @@ process BAMBU_ASSEMBLY {
     def NDR_args = NDR ? "--NDR=${NDR}" : ""
     def out_dir = NDR ? "transcriptome_NDR_${NDR}" : "transcriptome_NDR_DEFAULT"
     def prefix = task.ext.prefix ?: "${meta.id}"
+    def args = task.ext.args ?: ''
     """
     mkdir -p ${out_dir}
     transcript_assembly.R \\
@@ -36,7 +37,7 @@ process BAMBU_ASSEMBLY {
         --ref_genome=${ref_genome} \\
         --ref_gtf=${ref_gtf} \\
         --out_dir=${out_dir} \\
-        ${NDR_args}
+        ${NDR_args} ${args}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
