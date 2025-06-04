@@ -34,17 +34,19 @@ workflow BAMBU_NF {
     // MODULE: Run samtools view to filter bam files for reads aligned to accessory chromosomes
     //
     if (!params.skip_preprocessing) {
-        PREPROCESS_READS(ch_samplesheet, params.filter_reads, params.filter_acc_reads)
+        input_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, bam, bai) }
+        PREPROCESS_READS(input_ch, params.filter_reads, params.filter_acc_reads)
         rc_ch = PREPROCESS_READS.out.reads
         ch_versions = ch_versions.mix(PREPROCESS_READS.out.versions)
     }
     else {
         rc_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, rds) }
     }
+    rc_ch.view()
     // perform assembly & quantification with bambu
     if (params.recommended_NDR) {
         ch_bambu_default = BAMBU_ASSEMBLY(
-            rc_ch.rds,
+            rc_ch,
             params.yieldsize,
             [],
             params.fasta,
@@ -54,7 +56,7 @@ workflow BAMBU_NF {
     }
     // run at fixed NDR
     ch_bambu_ndr = BAMBU_NDR(
-        rc_ch.rds,
+        rc_ch,
         params.yieldsize,
         params.NDR,
         params.fasta,
@@ -64,24 +66,24 @@ workflow BAMBU_NF {
     // filter for detected transcripts
     BAMBU_FILTER(ch_bambu_ndr.se)
     ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
-    // merge transcriptomes across multiple samples
-    merge_ch = rc_ch.rds
-        .collect { meta, rds -> rds }
-        .map { meta, rds ->
-            def fmeta = [:]
-            // Set meta.id
-            fmeta.id = "merge"
-            [fmeta, rds]
-        }
-    merge_ch.view()
-    // run bambu merge at different NDRs
-    ch_bambu_merge = BAMBU_MERGE(
-        merge_ch,
-        params.yieldsize,
-        [],
-        params.fasta,
-        params.gtf,
-    )
+    // // merge transcriptomes across multiple samples
+    // merge_ch = rc_ch.rds
+    //     .collect { meta, rds -> rds }
+    //     .map { meta, rds ->
+    //         def fmeta = [:]
+    //         // Set meta.id
+    //         fmeta.id = "merge"
+    //         [fmeta, rds]
+    //     }
+    // merge_ch.view()
+    // // run bambu merge at different NDRs
+    // ch_bambu_merge = BAMBU_MERGE(
+    //     merge_ch,
+    //     params.yieldsize,
+    //     [],
+    //     params.fasta,
+    //     params.gtf,
+    // )
     //ch_versions = ch_versions.mix(BAMBU_MERGE.out.versions)
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     //

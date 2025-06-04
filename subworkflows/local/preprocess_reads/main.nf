@@ -37,7 +37,7 @@ workflow PREPROCESS_READS {
         ch_bam = ch_samplesheet.map { meta, bam, bai -> tuple(meta, bam) }
     }
     // create read classes with bambu
-    rc_ch = BAMBU_READCLASSES(
+    BAMBU_READCLASSES(
         ch_bam,
         params.yieldsize,
         params.fasta,
@@ -46,6 +46,6 @@ workflow PREPROCESS_READS {
     ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
 
     emit:
-    reads    = rc_ch.rds // channel: [ val(meta), [ rcFile ] ]
+    reads    = BAMBU_READCLASSES.out.rds // channel: [ val(meta), [ rcFile ] ]
     versions = ch_versions // channel: [ versions.yml ]
 }
