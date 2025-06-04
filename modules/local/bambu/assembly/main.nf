@@ -2,6 +2,7 @@
 // NOTE: be warying of errant spaces in the script section! optparse will be unhappy
 process BAMBU_ASSEMBLY {
     tag "${meta.id}"
+    cpus { rds.size() > 20 ? 20 : rds.size() }
     // for testing purposes
     label 'process_high_memory'
     publishDir "${params.outdir}/${meta.id}", mode: 'copy', overwrite: true
@@ -37,6 +38,7 @@ process BAMBU_ASSEMBLY {
         --ref_genome=${ref_genome} \\
         --ref_gtf=${ref_gtf} \\
         --out_dir=${out_dir} \\
+        --ncore=${task.cpus} \\
         ${NDR_args} ${args}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

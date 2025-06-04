@@ -281,6 +281,10 @@
                 "single_sample": {
                     "type": "boolean",
                     "description": "perform assembly/quant across each sample individually"
+                },
+                "skip_multisample": {
+                    "type": "boolean",
+                    "description": "skip merging of multiple samples for assembly/quant"
                 }
             }
         }
