@@ -5,6 +5,7 @@
 */
 include { SAMTOOLS_VIEW ; SAMTOOLS_VIEW as FILTER_READS } from '../modules/nf-core/samtools/view/main'
 include { BAMBU_READCLASSES             } from '../modules/local/bambu/readclasses/main'
+include { PREPROCESS_READS              } from '../subworkflows/local/preprocess_reads/main'
 include { BAMBU_ASSEMBLY ; BAMBU_ASSEMBLY as BAMBU_NDR } from '../modules/local/bambu/assembly/main'
 include { BAMBU_FILTER                  } from '../modules/local/bambu/filter/main'
 include { MULTIQC                       } from '../modules/nf-core/multiqc/main'
@@ -32,37 +33,14 @@ workflow BAMBU_NF {
     //
     // MODULE: Run samtools view to filter bam files for reads aligned to accessory chromosomes
     //
-    if (params.filter_reads) {
-        ch_filtered = FILTER_READS(
-            ch_samplesheet,
-            [[], []],
-            [],
-            "bai",
-        )
-        ch_bam = ch_filtered.bam
-        ch_versions = ch_versions.mix(FILTER_READS.out.versions.first())
-    }
-    else if (params.filter_acc_reads) {
-        ch_filtered = SAMTOOLS_VIEW(
-            ch_samplesheet,
-            [[], []],
-            [],
-            "bai",
-        )
-        ch_bam = ch_filtered.bam
-        ch_versions = ch_versions.mix(SAMTOOLS_VIEW.out.versions.first())
+    if (!params.skip_preprocessing) {
+        PREPROCESS_READS(ch_samplesheet, params.filter_reads, params.filter_acc_reads)
+        rc_ch = PREPROCESS_READS.out.reads
+        ch_versions = ch_versions.mix(PREPROCESS_READS.out.versions)
     }
     else {
-        ch_bam = ch_samplesheet.map { meta, bam, bai -> tuple(meta, bam) }
+        rc_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, rds) }
     }
-    // create read classes with bambu
-    rc_ch = BAMBU_READCLASSES(
-        ch_bam,
-        params.yieldsize,
-        params.fasta,
-        params.gtf,
-    )
-    ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
     // perform assembly & quantification with bambu
     if (params.recommended_NDR) {
         ch_bambu_default = BAMBU_ASSEMBLY(
@@ -88,13 +66,12 @@ workflow BAMBU_NF {
     ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
     // merge transcriptomes across multiple samples
     merge_ch = rc_ch.rds
-        .collect{meta, rds -> rds }
-        .map {
-            meta, rds ->
+        .collect { meta, rds -> rds }
+        .map { meta, rds ->
             def fmeta = [:]
             // Set meta.id
             fmeta.id = "merge"
-            [ fmeta, rds ]
+            [fmeta, rds]
         }
     merge_ch.view()
     // run bambu merge at different NDRs

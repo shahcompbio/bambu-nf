@@ -300,5 +300,11 @@
         {
             "$ref": "#/$defs/bambu_parameters"
         }
-    ]
+    ],
+    "properties": {
+        "skip_preprocessing": {
+            "type": "boolean",
+            "description": "use previously generated read classes from Bambu"
+        }
+    }
 }

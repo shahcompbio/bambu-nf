@@ -26,6 +26,13 @@
                 "exists": true,
                 "pattern": "^\\S+\\.bai$",
                 "errorMessage": "bai file for aligned bam cannot contain spaces and must have extension '.bai'"
+            },
+            "rcFile": {
+                "type": "string",
+                "format": "file-path",
+                "exists": true,
+                "pattern": "^\\S+\\.rds$",
+                "errorMessage": "transcript read classes from previous bambu runs cannot contain spaces and must have extension '.rds'"
             }
         },
         "required": ["sample", "bam", "bai"]
