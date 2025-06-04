@@ -34,4 +34,5 @@ nextflow run ${pipelinedir}/main.nf \
     --fasta ${fasta} \
     --recommended_NDR false \
     --gtf ${gtf} \
+    --single_sample \
     -resume

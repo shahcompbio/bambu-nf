@@ -40,8 +40,6 @@ workflow SINGLE_TRANSCRIPT_QUANT {
     ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
 
     emit:
-    ch_bambu_default
-    ch_bambu_ndr
-    ch_transcripts   = BAMBU_FILTER.out.gtf // channel: [val(meta), gtf]
     versions         = ch_versions // channel: [ versions.yml ]
 }
+

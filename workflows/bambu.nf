@@ -43,7 +43,7 @@ workflow BAMBU_NF {
     }
     rc_ch.view()
     // perform assembly & quantification with bambu
-    if (params.single_transcript_quant) {
+    if (params.single_sample) {
         SINGLE_TRANSCRIPT_QUANT(rc_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
         ch_versions = ch_versions.mix(SINGLE_TRANSCRIPT_QUANT.out.versions)
     }
