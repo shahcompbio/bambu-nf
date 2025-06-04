@@ -12,6 +12,8 @@ include { paramsSummaryMap              } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText        } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
+// modules for merge workflow
+include { BAMBU_ASSEMBLY as BAMBU_MERGE } from '../modules/local/bambu/assembly/main'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,7 +87,25 @@ workflow BAMBU_NF {
     BAMBU_FILTER(ch_bambu_ndr.se)
     ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
     // merge transcriptomes across multiple samples
-    rc_ch.collect { meta, rds -> rds }.view()
+    merge_ch = rc_ch.rds
+        .collect{meta, rds -> rds }
+        .map {
+            meta, rds ->
+            def fmeta = [:]
+            // Set meta.id
+            fmeta.id = "merge"
+            [ fmeta, rds ]
+        }
+    merge_ch.view()
+    // run bambu merge at different NDRs
+    ch_bambu_merge = BAMBU_MERGE(
+        merge_ch,
+        params.yieldsize,
+        [],
+        params.fasta,
+        params.gtf,
+    )
+    //ch_versions = ch_versions.mix(BAMBU_MERGE.out.versions)
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     //
     // Collate and save software versions

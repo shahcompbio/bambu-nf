@@ -15,7 +15,7 @@ source /home/preskaa/miniforge3/bin/activate nf-core
 
 module load java/20.0.1
 ## specify params
-outdir=/data1/shahs3/users/preskaa/SarcAtlas/data/APS033_ont_transcript_assembly/bambu_nf_test/nofilter_results
+outdir=/data1/shahs3/users/preskaa/SarcAtlas/data/APS033_ont_transcript_assembly/bambu_nf_test/multisample_results
 pipelinedir=$HOME/bambu-nf
 samplesheet=${pipelinedir}/assets/samplesheet.csv
 fasta=/data1/shahs3/isabl_data_lake/assemblies/GRCh38-P14/GRCh38.primary_assembly.genome.fa
@@ -27,10 +27,11 @@ cd ${outdir}
 # export NXF_SINGULARITY_OPTS="--bind /data1/shahs3:/data1/shahs3"
 
 nextflow run ${pipelinedir}/main.nf \
-    -profile singularity \
+    -profile singularity,test \
     -work-dir ${outdir}/work \
     --outdir ${outdir} \
     --input ${samplesheet} \
     --fasta ${fasta} \
+    --recommended_NDR false \
     --gtf ${gtf} \
     -resume

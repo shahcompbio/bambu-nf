@@ -30,7 +30,12 @@ se <- bambu(reads = opt$rds, annotations = annotations, ncore = opt$ncore,
             genome = opt$ref_genome, NDR = opt$NDR, verbose=TRUE,
             quant = opt$quant, yieldSize = opt$yieldsize, lowMemory=TRUE)
 ## write outputs to gtf and expression level files
-writeBambuOutput(se, path = opt$out_dir)
+if (opt$quant){
+  writeBambuOutput(se, path = opt$out_dir)
+} else {
+  gtf_out <- file.path(opt$out_dir, "extended_annotations.gtf")
+  writeToGTF(se, file = gtf_out)
+}
 #
 ## let's also save the summarized experiment object to play with later ...
 se_out <- sprintf("%s/se.RData", opt$out_dir)
