@@ -84,6 +84,8 @@ workflow BAMBU_NF {
     // filter for detected transcripts
     BAMBU_FILTER(ch_bambu_ndr.se)
     ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
+    // merge transcriptomes across multiple samples
+    rc_ch.collect { meta, rds -> rds }.view()
     //ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
     //
     // Collate and save software versions
