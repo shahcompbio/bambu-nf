@@ -46,6 +46,6 @@ workflow PREPROCESS_READS {
     ch_versions = ch_versions.mix(BAMBU_READCLASSES.out.versions)
 
     emit:
-    reads    = rc_ch.out.rds // channel: [ val(meta), [ rcFile ] ]
+    reads    = rc_ch.rds // channel: [ val(meta), [ rcFile ] ]
     versions = ch_versions // channel: [ versions.yml ]
 }
