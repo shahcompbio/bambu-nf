@@ -3,9 +3,8 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { SAMTOOLS_VIEW ; SAMTOOLS_VIEW as FILTER_READS } from '../modules/nf-core/samtools/view/main'
-include { BAMBU_READCLASSES             } from '../modules/local/bambu/readclasses/main'
 include { PREPROCESS_READS              } from '../subworkflows/local/preprocess_reads/main'
+include { SINGLE_TRANSCRIPT_QUANT       } from '../subworkflows/local/single_transcript_quant/main'
 include { BAMBU_ASSEMBLY ; BAMBU_ASSEMBLY as BAMBU_NDR } from '../modules/local/bambu/assembly/main'
 include { BAMBU_FILTER                  } from '../modules/local/bambu/filter/main'
 include { MULTIQC                       } from '../modules/nf-core/multiqc/main'
@@ -44,28 +43,10 @@ workflow BAMBU_NF {
     }
     rc_ch.view()
     // perform assembly & quantification with bambu
-    if (params.recommended_NDR) {
-        ch_bambu_default = BAMBU_ASSEMBLY(
-            rc_ch,
-            params.yieldsize,
-            [],
-            params.fasta,
-            params.gtf,
-        )
-        ch_versions = ch_versions.mix(BAMBU_ASSEMBLY.out.versions)
+    if (params.single_transcript_quant) {
+        SINGLE_TRANSCRIPT_QUANT(rc_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
+        ch_versions = ch_versions.mix(SINGLE_TRANSCRIPT_QUANT.out.versions)
     }
-    // run at fixed NDR
-    ch_bambu_ndr = BAMBU_NDR(
-        rc_ch,
-        params.yieldsize,
-        params.NDR,
-        params.fasta,
-        params.gtf,
-    )
-    ch_versions = ch_versions.mix(BAMBU_NDR.out.versions)
-    // filter for detected transcripts
-    BAMBU_FILTER(ch_bambu_ndr.se)
-    ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
     // // merge transcriptomes across multiple samples
     // merge_ch = rc_ch.rds
     //     .collect { meta, rds -> rds }

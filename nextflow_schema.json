@@ -277,6 +277,10 @@
                     "type": "boolean",
                     "default": true,
                     "description": "run bambu with recommended NDR"
+                },
+                "single_assembly": {
+                    "type": "boolean",
+                    "description": "perform transcript assembly/quant for each sample individually"
                 }
             }
         }
