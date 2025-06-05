@@ -6,7 +6,6 @@
 include { PREPROCESS_READS              } from '../subworkflows/local/preprocess_reads/main'
 include { SINGLE_TRANSCRIPT_QUANT       } from '../subworkflows/local/single_transcript_quant/main'
 include { MULTISAMPLE_TRANSCRIPT_QUANT  } from '../subworkflows/local/multisample_transcript_quant/main'
-include { BAMBU_ASSEMBLY as BAMBU_QUANT } from '../modules/local/bambu/assembly/main'
 include { MULTIQC                       } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap              } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -51,8 +50,12 @@ workflow BAMBU_NF {
         merge_ch = rc_ch
             .collect { meta, rds -> rds }
             .map { rds -> [["id": "merge"], rds] }
-        MULTISAMPLE_TRANSCRIPT_QUANT(merge_ch, bam_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
-        ch_versions = ch_versions.mix(MULTISAMPLE_TRANSCRIPT_QUANT.out.versions)
+        // run at recommended NDR
+        if (params.recommended_NDR) {
+            MULTISAMPLE_TRANSCRIPT_QUANT(merge_ch, bam_ch, [], params.yieldsize, params.fasta, params.gtf)
+            ch_versions = ch_versions.mix(MULTISAMPLE_TRANSCRIPT_QUANT.out.versions)
+        }
+        if()
     }
     //
     // Collate and save software versions
