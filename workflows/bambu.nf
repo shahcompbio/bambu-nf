@@ -53,11 +53,27 @@ workflow BAMBU_NF {
             .map { rds -> [["id": "merge"], rds] }
         // run at recommended NDR
         if (params.recommended_NDR) {
-            MULTISAMPLE_TRANSCRIPT_QUANT(merge_ch, bam_ch, [], params.yieldsize, params.fasta, params.gtf)
+            MULTISAMPLE_TRANSCRIPT_QUANT(
+                merge_ch,
+                bam_ch,
+                [],
+                params.yieldsize,
+                params.fasta,
+                params.gtf,
+                params.quantification,
+            )
             ch_versions = ch_versions.mix(MULTISAMPLE_TRANSCRIPT_QUANT.out.versions)
         }
         if (params.NDR != null) {
-            MULTISAMPLE_FIXED_NDR(merge_ch, bam_ch, params.NDR, params.yieldsize, params.fasta, params.gtf)
+            MULTISAMPLE_FIXED_NDR(
+                merge_ch,
+                bam_ch,
+                params.NDR,
+                params.yieldsize,
+                params.fasta,
+                params.gtf,
+                params.quantification,
+            )
             ch_versions = ch_versions.mix(MULTISAMPLE_FIXED_NDR.out.versions)
         }
     }

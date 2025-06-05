@@ -284,6 +284,10 @@
                 "skip_multisample": {
                     "type": "boolean",
                     "description": "skip merging of multiple samples for assembly/quant"
+                },
+                "quantification": {
+                    "type": "boolean",
+                    "description": "run bambu in quantification mode after merging samples"
                 }
             }
         }
