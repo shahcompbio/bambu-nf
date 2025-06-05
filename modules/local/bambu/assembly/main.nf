@@ -19,7 +19,7 @@ process BAMBU_ASSEMBLY {
 
     output:
     tuple val(meta), path("*/se.RData"), emit: se
-    tuple val(meta), path("transcriptome_*"), emit: bambu_out
+    tuple val(meta), path("transcriptome_*"), emit: transcriptome
     path "versions.yml", emit: versions
 
     when:

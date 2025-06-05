@@ -1,10 +1,11 @@
 // perform transcript assembly & quant with bambu across multiple samples as a merged analysis
 include { BAMBU_ASSEMBLY as BAMBU_MERGE     } from '../../../modules/local/bambu/assembly/main'
 include { BAMBU_ASSEMBLY as BAMBU_MERGE_NDR } from '../../../modules/local/bambu/assembly/main'
+include { BAMBU_ASSEMBLY as BAMBU_QUANT     } from '../../../modules/local/bambu/assembly/main'
 
 workflow MULTISAMPLE_TRANSCRIPT_QUANT {
     take:
-    merge_ch           // channel: [ val(meta), [ rds ] ]
+    merge_ch        // channel: [ val(meta), [ rds ] ]
     recommended_NDR // boolean; use recommended NDR for bambu assembly
     yieldsize       // integer; number of reads to process with bambu
     fasta           // ref genome
