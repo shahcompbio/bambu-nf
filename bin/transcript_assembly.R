@@ -11,6 +11,8 @@ option_list = list(
               help="bambu NDR; modulates FDR", metavar="character"),
   make_option("--quant", type="logical", default=TRUE, 
               help="whether to run quantification", metavar="logical"),
+  make_option("--discovery", type="logical", default=TRUE, 
+              help="whether to run quantification", metavar="logical"),
   make_option("--ncore", type="numeric", default=1, 
               help="number of threads", metavar="numeric"),
   make_option("--ref_genome", type="character", default=NULL, 
@@ -32,7 +34,8 @@ sprintf("processing %s read classes", length(rds))
 ## run bambu
 se <- bambu(reads = rds, annotations = annotations, ncore = opt$ncore,
             genome = opt$ref_genome, NDR = opt$NDR, verbose=TRUE,
-            quant = opt$quant, yieldSize = opt$yieldsize, lowMemory=TRUE)
+            quant = opt$quant, discovery=opt$discovery, 
+            yieldSize = opt$yieldsize, lowMemory=TRUE)
 ## write outputs to gtf and expression level files
 if (opt$quant){
   writeBambuOutput(se, path = opt$out_dir)

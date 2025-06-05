@@ -15,7 +15,7 @@ source /home/preskaa/miniforge3/bin/activate nf-core
 
 module load java/20.0.1
 ## specify params
-outdir=/data1/shahs3/users/preskaa/SarcAtlas/data/APS033_ont_transcript_assembly/bambu_nf_test/nopreprocess_multisample_test
+outdir=/data1/shahs3/users/preskaa/SarcAtlas/data/APS033_ont_transcript_assembly/bambu_nf_test/preprocess_multisample_test
 pipelinedir=$HOME/bambu-nf
 samplesheet=${pipelinedir}/assets/samplesheet.csv
 fasta=/data1/shahs3/isabl_data_lake/assemblies/GRCh38-P14/GRCh38.primary_assembly.genome.fa
@@ -33,5 +33,4 @@ nextflow run ${pipelinedir}/main.nf \
     --input ${samplesheet} \
     --fasta ${fasta} \
     --gtf ${gtf} \
-    --skip_preprocessing \
     -resume

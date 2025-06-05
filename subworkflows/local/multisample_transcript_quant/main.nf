@@ -1,11 +1,12 @@
 // perform transcript assembly & quant with bambu across multiple samples as a merged analysis
 include { BAMBU_ASSEMBLY as BAMBU_MERGE     } from '../../../modules/local/bambu/assembly/main'
 include { BAMBU_ASSEMBLY as BAMBU_MERGE_NDR } from '../../../modules/local/bambu/assembly/main'
-include { BAMBU_ASSEMBLY as BAMBU_QUANT     } from '../../../modules/local/bambu/assembly/main'
+include { BAMBU_ASSEMBLY as BAMBU_MERGE_QUANT     } from '../../../modules/local/bambu/assembly/main'
 
 workflow MULTISAMPLE_TRANSCRIPT_QUANT {
     take:
     merge_ch        // channel: [ val(meta), [ rds ] ]
+    bam_ch       // channel: [ val(meta), path(bam) ]
     recommended_NDR // boolean; use recommended NDR for bambu assembly
     yieldsize       // integer; number of reads to process with bambu
     fasta           // ref genome
@@ -15,12 +16,9 @@ workflow MULTISAMPLE_TRANSCRIPT_QUANT {
     main:
 
     ch_versions = Channel.empty()
-
-    // merge transcriptomes across multiple samples
-    merge_ch.view()
     // run bambu merge at different NDRs
     if (recommended_NDR) {
-        ch_bambu_merge = BAMBU_MERGE(
+        BAMBU_MERGE(
             merge_ch,
             yieldsize,
             [],
@@ -30,7 +28,7 @@ workflow MULTISAMPLE_TRANSCRIPT_QUANT {
         ch_versions = ch_versions.mix(BAMBU_MERGE.out.versions)
     }
     // run at fixed NDR
-    ch_bambu_ndr = BAMBU_MERGE_NDR(
+    BAMBU_MERGE_NDR(
         merge_ch,
         yieldsize,
         NDR,
@@ -38,7 +36,20 @@ workflow MULTISAMPLE_TRANSCRIPT_QUANT {
         gtf,
     )
     ch_versions = ch_versions.mix(BAMBU_MERGE_NDR.out.versions)
-
+    // run bambu in quantification mode
+    multi_gtf_ch = BAMBU_MERGE
+                    .out.transcriptome
+                    .map { meta, dir -> 
+                    def gtf = file("${dir}/extended_annotations.gtf")
+                    gtf}
+    multi_gtf_ch.view()
+    BAMBU_MERGE_QUANT(
+        bam_ch,
+        yieldsize,
+        [],
+        fasta,
+        multi_gtf_ch,
+    )
     emit:
     versions = ch_versions // channel: [ versions.yml ]
 }

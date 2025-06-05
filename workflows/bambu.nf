@@ -51,11 +51,8 @@ workflow BAMBU_NF {
         merge_ch = rc_ch
             .collect { meta, rds -> rds }
             .map { rds -> [["id": "merge"], rds] }
-        multi_ch = MULTISAMPLE_TRANSCRIPT_QUANT(merge_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
-        ch_versions = ch_versions.mix(multi_ch.out.versions)
-        // run bambu in quantification mode
-        multi_gtf_ch = multi_ch.out.transcriptome
-        multi_gtf_ch.view()
+        MULTISAMPLE_TRANSCRIPT_QUANT(merge_ch, bam_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
+        ch_versions = ch_versions.mix(MULTISAMPLE_TRANSCRIPT_QUANT.out.versions)
     }
     //
     // Collate and save software versions
