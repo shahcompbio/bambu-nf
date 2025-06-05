@@ -3,14 +3,15 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { PREPROCESS_READS              } from '../subworkflows/local/preprocess_reads/main'
-include { SINGLE_TRANSCRIPT_QUANT       } from '../subworkflows/local/single_transcript_quant/main'
-include { MULTISAMPLE_TRANSCRIPT_QUANT  } from '../subworkflows/local/multisample_transcript_quant/main'
-include { MULTIQC                       } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap              } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc          } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML        } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText        } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
+include { PREPROCESS_READS                                      } from '../subworkflows/local/preprocess_reads/main'
+include { SINGLE_TRANSCRIPT_QUANT                               } from '../subworkflows/local/single_transcript_quant/main'
+include { MULTISAMPLE_TRANSCRIPT_QUANT                          } from '../subworkflows/local/multisample_transcript_quant/main'
+include { MULTISAMPLE_TRANSCRIPT_QUANT as MULTISAMPLE_FIXED_NDR } from '../subworkflows/local/multisample_transcript_quant/main'
+include { MULTIQC                                               } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                                      } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                                } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
 // modules for merge workflow
 
 /*
@@ -55,7 +56,10 @@ workflow BAMBU_NF {
             MULTISAMPLE_TRANSCRIPT_QUANT(merge_ch, bam_ch, [], params.yieldsize, params.fasta, params.gtf)
             ch_versions = ch_versions.mix(MULTISAMPLE_TRANSCRIPT_QUANT.out.versions)
         }
-        if()
+        if (params.NDR != null) {
+            MULTISAMPLE_FIXED_NDR(merge_ch, bam_ch, params.NDR, params.yieldsize, params.fasta, params.gtf)
+            ch_versions = ch_versions.mix(MULTISAMPLE_FIXED_NDR.out.versions)
+        }
     }
     //
     // Collate and save software versions
