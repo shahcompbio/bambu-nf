@@ -30,10 +30,11 @@ process BAMBU_ASSEMBLY {
     def out_dir = NDR ? "transcriptome_NDR_${NDR}" : "transcriptome_NDR_DEFAULT"
     def prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
+    def rds_list = rds.join(',')
     """
     mkdir -p ${out_dir}
     transcript_assembly.R \\
-        --rds=${rds} \\
+        --rds=${rds_list} \\
         --yieldsize=${yieldsize} \\
         --ref_genome=${ref_genome} \\
         --ref_gtf=${ref_gtf} \\

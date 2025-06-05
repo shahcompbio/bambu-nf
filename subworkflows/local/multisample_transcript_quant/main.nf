@@ -4,7 +4,7 @@ include { BAMBU_ASSEMBLY as BAMBU_MERGE_NDR } from '../../../modules/local/bambu
 
 workflow MULTISAMPLE_TRANSCRIPT_QUANT {
     take:
-    rc_ch           // channel: [ val(meta), [ rds ] ]
+    merge_ch           // channel: [ val(meta), [ rds ] ]
     recommended_NDR // boolean; use recommended NDR for bambu assembly
     yieldsize       // integer; number of reads to process with bambu
     fasta           // ref genome
@@ -16,14 +16,6 @@ workflow MULTISAMPLE_TRANSCRIPT_QUANT {
     ch_versions = Channel.empty()
 
     // merge transcriptomes across multiple samples
-    merge_ch = rc_ch.rds
-        .collect { meta, rds -> rds }
-        .map { meta, rds ->
-            def fmeta = [:]
-            // Set meta.id
-            fmeta.id = "merge"
-            [fmeta, rds]
-        }
     merge_ch.view()
     // run bambu merge at different NDRs
     if (recommended_NDR) {

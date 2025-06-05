@@ -26,7 +26,11 @@ opt = parse_args(opt_parser);
 # This function creates a reference annotation object which is used for transcript discovery and quantification in Bambu.
 annotations <- prepareAnnotations(opt$ref_gtf)
 ####################
-se <- bambu(reads = opt$rds, annotations = annotations, ncore = opt$ncore,
+# prepare a vector of read classes
+rds <- strsplit(opt$rds, ",")[[1]]
+sprintf("processing %s read classes", length(rds))
+## run bambu
+se <- bambu(reads = rds, annotations = annotations, ncore = opt$ncore,
             genome = opt$ref_genome, NDR = opt$NDR, verbose=TRUE,
             quant = opt$quant, yieldSize = opt$yieldsize, lowMemory=TRUE)
 ## write outputs to gtf and expression level files

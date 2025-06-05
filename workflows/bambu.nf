@@ -39,14 +39,16 @@ workflow BAMBU_NF {
     else {
         rc_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, rds) }
     }
-    rc_ch.view()
     // perform assembly & quantification with bambu
     if (params.single_sample) {
         SINGLE_TRANSCRIPT_QUANT(rc_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
         ch_versions = ch_versions.mix(SINGLE_TRANSCRIPT_QUANT.out.versions)
     }
     if (!params.skip_multisample) {
-        MULTISAMPLE_TRANSCRIPT_QUANT(rc_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
+        merge_ch = rc_ch
+                    .collect { meta, rds -> rds }
+                    .map { rds -> [["id": "merge"], rds] }
+        MULTISAMPLE_TRANSCRIPT_QUANT(merge_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
         ch_versions = ch_versions.mix(MULTISAMPLE_TRANSCRIPT_QUANT.out.versions)
     }
     // // merge transcriptomes across multiple samples
