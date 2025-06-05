@@ -265,7 +265,6 @@
             "properties": {
                 "NDR": {
                     "type": "number",
-                    "default": 0.1,
                     "description": "set novel discovery rate for Bambu"
                 },
                 "yieldsize": {
