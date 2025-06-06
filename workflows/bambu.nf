@@ -4,6 +4,9 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { PREPROCESS_READS                           } from '../subworkflows/local/preprocess_reads/main'
+include { BAMBU_ASSEMBLY as BAMBU } from '../modules/local/bambu/assembly/main'
+include { BAMBU_ASSEMBLY as BAMBU_MERGE } from '../modules/local/bambu/assembly/main'
+include { BAMBU_ASSEMBLY as BAMBU_MERGE_QUANT } from '../modules/local/bambu/assembly/main'
 include { TRANSCRIPT_QUANT ; TRANSCRIPT_QUANT as TRANSCRIPT_QUANT_MERGE } from '../subworkflows/local/transcript_quant/main'
 include { SEMERGE                                    } from '../modules/local/semerge/main'
 include { BAMBU_FILTER                               } from '../modules/local/bambu/filter/main'
@@ -46,34 +49,57 @@ workflow BAMBU_NF {
         bam_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, bam) }
     }
     // perform assembly & quantification with bambu
+    // make an NDR channel
     if (params.recommended_NDR && params.NDR != null) {
-        ch_NDR = Channel.of([], params.NDR)
+        ch_NDR = channel.of([], params.NDR)
     }
     else if (params.recommended_NDR) {
-        ch_NDR = Channel.of([])
+        ch_NDR = channel.of([])
     }
     else {
-        ch_NDR = Channel.of(params.NDR)
+        ch_NDR = channel.of(params.NDR)
     }
-    // run single sample mode
+    // closure to handle empty NDR
+        def padNDR = { tup ->
+        tup.size() < 3
+            ? [ tup[0], tup[1], [] ]
+            : tup
+    }
+    ref_gtf_ch = channel.of(params.gtf)
+
+    // run single sample assembly & quant with read classes
     if (params.single_sample) {
-        TRANSCRIPT_QUANT(rc_ch, bam_ch, ch_NDR, yield, genome, gtf, false)
-        ch_versions = ch_versions.mix(TRANSCRIPT_QUANT.out.versions)
+        // combine read classes and NDR channels
+        bambu_input_ch = rc_ch
+                            .combine(ch_NDR)
+                            .map(padNDR)
+                            .combine(ref_gtf_ch)
+        BAMBU(bambu_input_ch, yield, genome)
+        ch_versions = ch_versions.mix(BAMBU.out.versions)
     }
-    // run multisample mode
+    // run multisample mode; assembly then quant
     if (!params.skip_multisample) {
         merge_ch = rc_ch
             .collect { meta, rds -> rds }
             .map { rds -> [["id": "merge"], rds] }
-        TRANSCRIPT_QUANT_MERGE(merge_ch, bam_ch, ch_NDR, yield, genome, gtf, merge_quant)
-        ch_versions = ch_versions.mix(TRANSCRIPT_QUANT_MERGE.out.versions)
-        // combine summarized experiments if we ran quantification
+        merge_input_ch = merge_ch
+                            .combine(ch_NDR)
+                            .map(padNDR)
+                            .combine(ref_gtf_ch)
+        BAMBU_MERGE(merge_input_ch, yield, genome)
+        ch_versions = ch_versions.mix(BAMBU_MERGE.out.versions)
+        // run multisample quantification
         if (merge_quant) {
+            // run bambu in quantification mode with merged gtf
+            ext_gtf_ch = BAMBU_MERGE.out.gtf.map{meta, NDR, ext_gtf -> tuple(NDR, ext_gtf)}.view()
+            merge_quant_ch = bam_ch.combine(ext_gtf_ch)
+            BAMBU_MERGE_QUANT(merge_quant_ch,yield,genome)
             // collect all summarized experiments for each NDR
-            se_ch = TRANSCRIPT_QUANT_MERGE.out.se
-                .map { meta, se -> tuple(meta.NDR, se) }
-                .groupTuple()
-            se_ch.view()
+            //BAMBU_MERGE_QUANT.out.se.view()
+            // se_ch = TRANSCRIPT_QUANT_MERGE.out.se
+            //     .map { meta, se -> tuple(meta.NDR, se) }
+            //     .groupTuple()
+            // se_ch.view()
         }
     }
     // filter for detected transcripts

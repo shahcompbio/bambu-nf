@@ -46,6 +46,7 @@ workflow TRANSCRIPT_QUANT {
     else {
         ch_se = BAMBU.out.se
     }
+    ch_se.view()
     // add NDR to metamap
     ch_se = ch_se.map { meta, se -> [meta + ["NDR": NDR], se] }
 

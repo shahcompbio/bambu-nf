@@ -1,7 +1,7 @@
 // transcript assembly with bambu
 // NOTE: be warying of errant spaces in the script section! optparse will be unhappy
 process BAMBU_ASSEMBLY {
-    tag "${meta.id}"
+    tag "${meta.id}_NDR_${NDR ?: 'DEFAULT'}"
     cpus { rds.size() > 20 ? 20 : rds.size() }
     // for testing purposes
     label 'process_high_memory'
@@ -11,15 +11,14 @@ process BAMBU_ASSEMBLY {
     container "quay.io/shahlab_singularity/bambu:3.10.0beta"
 
     input:
-    tuple val(meta), path(rds, arity: '1..*')
+    tuple val(meta), path(rds, arity: '1..*'), val(NDR), path(ref_gtf)
     val yieldsize
-    val NDR
     path ref_genome
-    path ref_gtf
 
     output:
-    tuple val(meta), path("*/se.RData"), emit: se
-    tuple val(meta), path("transcriptome_*"), emit: transcriptome
+    tuple val(meta), val(NDR), path("*/se.RData"), emit: se
+    tuple val(meta), val(NDR), path("transcriptome_*"), emit: transcriptome
+    tuple val(meta), val(NDR), path("*/extended_annotations.gtf"), emit: gtf, optional: true
     path "versions.yml", emit: versions
 
     when:

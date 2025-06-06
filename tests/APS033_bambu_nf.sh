@@ -33,4 +33,6 @@ nextflow run ${pipelinedir}/main.nf \
     --input ${samplesheet} \
     --fasta ${fasta} \
     --gtf ${gtf} \
+    --NDR=0.1 \
+    --multisample_quant \
     -resume
