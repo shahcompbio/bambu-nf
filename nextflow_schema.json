@@ -285,9 +285,13 @@
                     "type": "boolean",
                     "description": "skip merging of multiple samples for assembly/quant"
                 },
-                "quantification": {
+                "multisample_quant": {
                     "type": "boolean",
-                    "description": "run bambu in quantification mode after merging samples"
+                    "description": "run quantification after merging multiple samples"
+                },
+                "quant_only": {
+                    "type": "boolean",
+                    "description": "run bambu in quantification mode only"
                 }
             }
         }

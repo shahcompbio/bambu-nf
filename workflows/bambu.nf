@@ -3,17 +3,13 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { PREPROCESS_READS                         } from '../subworkflows/local/preprocess_reads/main'
-include { SINGLE_TRANSCRIPT_QUANT                  } from '../subworkflows/local/single_transcript_quant/main'
-include { TRANSCRIPT_QUANT as TRANSCRIPT_MERGE     } from '../subworkflows/local/transcript_quant/main'
-include { TRANSCRIPT_QUANT as TRANSCRIPT_MERGE_NDR } from '../subworkflows/local/transcript_quant/main'
-include { MULTIQC                                  } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                         } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc                     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML                   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                   } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
-// modules for merge workflow
-
+include { PREPROCESS_READS                           } from '../subworkflows/local/preprocess_reads/main'
+include { TRANSCRIPT_QUANT ; TRANSCRIPT_QUANT as TRANSCRIPT_QUANT_MERGE } from '../subworkflows/local/transcript_quant/main'
+include { MULTIQC                                    } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                           } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                     } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -25,7 +21,12 @@ workflow BAMBU_NF {
     ch_samplesheet // channel: samplesheet read in from --input
 
     main:
-
+    // shorten param names called by workflows for readability
+    def yield = params.yieldsize
+    def genome = params.fasta
+    def gtf = params.gtf
+    def merge_quant = params.multisample_quant
+    // begin workflow
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
     //
@@ -43,39 +44,27 @@ workflow BAMBU_NF {
         bam_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, bam) }
     }
     // perform assembly & quantification with bambu
-    if (params.single_sample) {
-        SINGLE_TRANSCRIPT_QUANT(rc_ch, params.recommended_NDR, params.yieldsize, params.fasta, params.gtf, params.NDR)
-        ch_versions = ch_versions.mix(SINGLE_TRANSCRIPT_QUANT.out.versions)
+    if (params.recommended_NDR && params.NDR != null) {
+        ch_NDR = Channel.of([], params.NDR)
     }
+    else if (params.recommended_NDR) {
+        ch_NDR = Channel.of([])
+    }
+    else {
+        ch_NDR = Channel.of(params.NDR)
+    }
+    // run single sample mode
+    if (params.single_sample) {
+        TRANSCRIPT_QUANT(rc_ch, bam_ch, ch_NDR, yield, genome, gtf, false)
+        ch_versions = ch_versions.mix(TRANSCRIPT_QUANT.out.versions)
+    }
+    // run multisample mode
     if (!params.skip_multisample) {
         merge_ch = rc_ch
             .collect { meta, rds -> rds }
             .map { rds -> [["id": "merge"], rds] }
-        // run at recommended NDR
-        if (params.recommended_NDR) {
-            TRANSCRIPT_MERGE(
-                merge_ch,
-                bam_ch,
-                [],
-                params.yieldsize,
-                params.fasta,
-                params.gtf,
-                params.quantification,
-            )
-            ch_versions = ch_versions.mix(TRANSCRIPT_MERGE.out.versions)
-        }
-        if (params.NDR != null) {
-            TRANSCRIPT_MERGE_NDR(
-                merge_ch,
-                bam_ch,
-                params.NDR,
-                params.yieldsize,
-                params.fasta,
-                params.gtf,
-                params.quantification,
-            )
-            ch_versions = ch_versions.mix(TRANSCRIPT_MERGE_NDR.out.versions)
-        }
+        TRANSCRIPT_QUANT_MERGE(merge_ch, bam_ch, ch_NDR, yield, genome, gtf, merge_quant)
+        ch_versions = ch_versions.mix(TRANSCRIPT_QUANT_MERGE.out.versions)
     }
     //
     // Collate and save software versions
