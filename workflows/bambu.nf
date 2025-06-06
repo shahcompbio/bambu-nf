@@ -3,15 +3,15 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { PREPROCESS_READS                                      } from '../subworkflows/local/preprocess_reads/main'
-include { SINGLE_TRANSCRIPT_QUANT                               } from '../subworkflows/local/single_transcript_quant/main'
-include { MULTISAMPLE_TRANSCRIPT_QUANT                          } from '../subworkflows/local/multisample_transcript_quant/main'
-include { MULTISAMPLE_TRANSCRIPT_QUANT as MULTISAMPLE_FIXED_NDR } from '../subworkflows/local/multisample_transcript_quant/main'
-include { MULTIQC                                               } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                                      } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc                                  } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML                                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                                } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
+include { PREPROCESS_READS                         } from '../subworkflows/local/preprocess_reads/main'
+include { SINGLE_TRANSCRIPT_QUANT                  } from '../subworkflows/local/single_transcript_quant/main'
+include { TRANSCRIPT_QUANT as TRANSCRIPT_MERGE     } from '../subworkflows/local/transcript_quant/main'
+include { TRANSCRIPT_QUANT as TRANSCRIPT_MERGE_NDR } from '../subworkflows/local/transcript_quant/main'
+include { MULTIQC                                  } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                         } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML                   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText                   } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
 // modules for merge workflow
 
 /*
@@ -53,7 +53,7 @@ workflow BAMBU_NF {
             .map { rds -> [["id": "merge"], rds] }
         // run at recommended NDR
         if (params.recommended_NDR) {
-            MULTISAMPLE_TRANSCRIPT_QUANT(
+            TRANSCRIPT_MERGE(
                 merge_ch,
                 bam_ch,
                 [],
@@ -62,10 +62,10 @@ workflow BAMBU_NF {
                 params.gtf,
                 params.quantification,
             )
-            ch_versions = ch_versions.mix(MULTISAMPLE_TRANSCRIPT_QUANT.out.versions)
+            ch_versions = ch_versions.mix(TRANSCRIPT_MERGE.out.versions)
         }
         if (params.NDR != null) {
-            MULTISAMPLE_FIXED_NDR(
+            TRANSCRIPT_MERGE_NDR(
                 merge_ch,
                 bam_ch,
                 params.NDR,
@@ -74,7 +74,7 @@ workflow BAMBU_NF {
                 params.gtf,
                 params.quantification,
             )
-            ch_versions = ch_versions.mix(MULTISAMPLE_FIXED_NDR.out.versions)
+            ch_versions = ch_versions.mix(TRANSCRIPT_MERGE_NDR.out.versions)
         }
     }
     //
