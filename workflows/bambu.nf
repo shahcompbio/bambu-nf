@@ -5,6 +5,8 @@
 */
 include { PREPROCESS_READS                           } from '../subworkflows/local/preprocess_reads/main'
 include { TRANSCRIPT_QUANT ; TRANSCRIPT_QUANT as TRANSCRIPT_QUANT_MERGE } from '../subworkflows/local/transcript_quant/main'
+include { SEMERGE                                    } from '../modules/local/semerge/main'
+include { BAMBU_FILTER                               } from '../modules/local/bambu/filter/main'
 include { MULTIQC                                    } from '../modules/nf-core/multiqc/main'
 include { paramsSummaryMap                           } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc                       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -65,10 +67,20 @@ workflow BAMBU_NF {
             .map { rds -> [["id": "merge"], rds] }
         TRANSCRIPT_QUANT_MERGE(merge_ch, bam_ch, ch_NDR, yield, genome, gtf, merge_quant)
         ch_versions = ch_versions.mix(TRANSCRIPT_QUANT_MERGE.out.versions)
+        // combine summarized experiments if we ran quantification
+        if (merge_quant) {
+            // collect all summarized experiments for each NDR
+            se_ch = TRANSCRIPT_QUANT_MERGE.out.se
+                .map { meta, se -> tuple(meta.NDR, se) }
+                .groupTuple()
+            se_ch.view()
+        }
     }
-    //
-    // Collate and save software versions
-    //
+    // filter for detected transcripts
+    // all_se_ch = merge_se_ch.mix(TRANSCRIPT_QUANT.out.se)
+    // BAMBU_FILTER(all_se_ch)
+    // ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
+    // collect versions
     softwareVersionsToYAML(ch_versions)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",

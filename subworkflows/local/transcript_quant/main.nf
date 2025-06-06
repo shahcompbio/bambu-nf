@@ -39,7 +39,17 @@ workflow TRANSCRIPT_QUANT {
             multi_gtf_ch,
         )
     }
+    // emit summarized experiment for further processing
+    if (quant) {
+        ch_se = BAMBU_QUANT.out.se
+    }
+    else {
+        ch_se = BAMBU.out.se
+    }
+    // add NDR to metamap
+    ch_se = ch_se.map { meta, se -> [meta + ["NDR": NDR], se] }
 
     emit:
+    se       = ch_se // channel: [ val(meta), path(se) ]
     versions = ch_versions // channel: [ versions.yml ]
 }
