@@ -3,18 +3,17 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { PREPROCESS_READS                           } from '../subworkflows/local/preprocess_reads/main'
-include { BAMBU_ASSEMBLY as BAMBU } from '../modules/local/bambu/assembly/main'
-include { BAMBU_ASSEMBLY as BAMBU_MERGE } from '../modules/local/bambu/assembly/main'
+include { PREPROCESS_READS                    } from '../subworkflows/local/preprocess_reads/main'
+include { BAMBU_ASSEMBLY as BAMBU             } from '../modules/local/bambu/assembly/main'
+include { BAMBU_ASSEMBLY as BAMBU_MERGE       } from '../modules/local/bambu/assembly/main'
 include { BAMBU_ASSEMBLY as BAMBU_MERGE_QUANT } from '../modules/local/bambu/assembly/main'
-include { TRANSCRIPT_QUANT ; TRANSCRIPT_QUANT as TRANSCRIPT_QUANT_MERGE } from '../subworkflows/local/transcript_quant/main'
-include { SEMERGE                                    } from '../modules/local/semerge/main'
-include { BAMBU_FILTER                               } from '../modules/local/bambu/filter/main'
-include { MULTIQC                                    } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap                           } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc                       } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML                     } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText                     } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
+include { SEMERGE                             } from '../modules/local/semerge/main'
+include { BAMBU_FILTER                        } from '../modules/local/bambu/filter/main'
+include { MULTIQC                             } from '../modules/nf-core/multiqc/main'
+include { paramsSummaryMap                    } from 'plugin/nf-schema'
+include { paramsSummaryMultiqc                } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { softwareVersionsToYAML              } from '../subworkflows/nf-core/utils_nfcore_pipeline'
+include { methodsDescriptionText              } from '../subworkflows/local/utils_nfcore_bambu-nf_pipeline'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -60,7 +59,7 @@ workflow BAMBU_NF {
         ch_NDR = channel.of(params.NDR)
     }
     // add NDR to metamap
-    def NDRmetamap = { meta, rds, NDR -> 
+    def NDRmetamap = { meta, rds, NDR ->
         def new_meta = meta.clone()
         new_meta.NDR = NDR
         return [new_meta, rds]
@@ -68,17 +67,17 @@ workflow BAMBU_NF {
     ref_gtf_ch = channel.of(params.gtf)
     // run single sample assembly & quant with read classes
     // if only one sample is provided, run single sample mode
-    if (rc_ch.count() == 1) { 
+    if (rc_ch.count() == 1) {
         params.single_sample = true
-        params.skip_multisample = true 
-        }
+        params.skip_multisample = true
+    }
     single_se_ch = Channel.empty()
     if (params.single_sample) {
         // combine read classes and NDR channels
         bambu_input_ch = rc_ch
-                            .combine(ch_NDR)
-                            .map(NDRmetamap)
-                            .combine(ref_gtf_ch)
+            .combine(ch_NDR)
+            .map(NDRmetamap)
+            .combine(ref_gtf_ch)
         BAMBU(bambu_input_ch, yield, genome)
         single_se_ch = BAMBU.out.se
         ch_versions = ch_versions.mix(BAMBU.out.versions)
@@ -90,29 +89,33 @@ workflow BAMBU_NF {
             .collect { meta, rds -> rds }
             .map { rds -> [["id": "merge"], rds] }
         merge_input_ch = merge_ch
-                            .combine(ch_NDR)
-                            .map(NDRmetamap)
-                            .combine(ref_gtf_ch)
+            .combine(ch_NDR)
+            .map(NDRmetamap)
+            .combine(ref_gtf_ch)
         // merge_input_ch.view()
         BAMBU_MERGE(merge_input_ch, yield, genome)
         ch_versions = ch_versions.mix(BAMBU_MERGE.out.versions)
         // run multisample quantification
         if (merge_quant) {
             // run bambu in quantification mode with merged gtf
-            merge_quant_ch = bam_ch.combine(BAMBU_MERGE.out.gtf).map{meta1, bam, meta2, ext_gtf ->
-                def meta = meta1.clone()
-                meta.NDR = meta2.NDR
-                return [meta, bam, ext_gtf]
-            }
+            merge_quant_ch = bam_ch
+                .combine(BAMBU_MERGE.out.gtf)
+                .map { meta1, bam, meta2, ext_gtf ->
+                    def meta = meta1.clone()
+                    meta.NDR = meta2.NDR
+                    return [meta, bam, ext_gtf]
+                }
             // merge_quant_ch.view()
-            BAMBU_MERGE_QUANT(merge_quant_ch,yield,genome)
+            BAMBU_MERGE_QUANT(merge_quant_ch, yield, genome)
             ch_versions = ch_versions.mix(BAMBU_MERGE_QUANT.out.versions)
             // collect all summarized experiments for each NDR
-            se_ch = BAMBU_MERGE_QUANT.out.se.map { meta, se ->
-                def fmeta = meta.clone()
-                fmeta.id = "merge"
-                return [fmeta, se]
-            }.groupTuple(by: 0)
+            se_ch = BAMBU_MERGE_QUANT.out.se
+                .map { meta, se ->
+                    def fmeta = meta.clone()
+                    fmeta.id = "merge"
+                    return [fmeta, se]
+                }
+                .groupTuple(by: 0)
             SEMERGE(se_ch)
             merge_se_ch = SEMERGE.out.se
             ch_versions = ch_versions.mix(SEMERGE.out.versions)
