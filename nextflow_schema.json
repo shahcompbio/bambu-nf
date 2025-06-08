@@ -279,18 +279,22 @@
                 },
                 "single_sample": {
                     "type": "boolean",
-                    "description": "perform assembly/quant across each sample individually"
+                    "default": false,
+                    "description": "run bambu on samples separately"
                 },
                 "skip_multisample": {
                     "type": "boolean",
-                    "description": "skip merging of multiple samples for assembly/quant"
+                    "default": false,
+                    "description": "skip multisample transcript assembly"
                 },
                 "multisample_quant": {
                     "type": "boolean",
-                    "description": "run quantification after merging multiple samples"
+                    "default": false,
+                    "description": "run quantification after multisample transcript assembly"
                 },
                 "quant_only": {
                     "type": "boolean",
+                    "default": false,
                     "description": "run bambu in quantification mode only"
                 }
             }
