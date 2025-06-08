@@ -36,4 +36,5 @@ nextflow run ${pipelinedir}/main.nf \
     --gtf ${gtf} \
     --NDR=0.1 \
     --multisample_quant \
+    --skip_preprocessing \
     -resume

@@ -263,6 +263,10 @@
             "description": "parameters for transcript assembly",
             "default": "",
             "properties": {
+                "skip_preprocessing": {
+                    "type": "boolean",
+                    "description": "use previously generated bambu read classes"
+                },
                 "NDR": {
                     "type": "number",
                     "description": "set novel discovery rate for Bambu"
@@ -279,22 +283,18 @@
                 },
                 "single_sample": {
                     "type": "boolean",
-                    "default": false,
                     "description": "run bambu on samples separately"
                 },
                 "skip_multisample": {
                     "type": "boolean",
-                    "default": false,
                     "description": "skip multisample transcript assembly"
                 },
                 "multisample_quant": {
                     "type": "boolean",
-                    "default": false,
                     "description": "run quantification after multisample transcript assembly"
                 },
                 "quant_only": {
                     "type": "boolean",
-                    "default": false,
                     "description": "run bambu in quantification mode only"
                 }
             }
@@ -319,11 +319,5 @@
         {
             "$ref": "#/$defs/bambu_parameters"
         }
-    ],
-    "properties": {
-        "skip_preprocessing": {
-            "type": "boolean",
-            "description": "use previously generated read classes from Bambu"
-        }
-    }
+    ]
 }
