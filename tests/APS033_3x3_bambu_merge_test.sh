@@ -1,14 +1,14 @@
 #!/bin/bash
-#SBATCH --partition=cpu_short
+#SBATCH --partition=componc_cpu
 #SBATCH --account=shahs3
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=2
-#SBATCH --time=1:00:00
-#SBATCH --mem=20GB
+#SBATCH --cpus-per-task=1
+#SBATCH --time=12:00:00
+#SBATCH --mem=8GB
 #SBATCH --job-name=bambu
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=preskaa@mskcc.org
-#SBATCH --output=slurm%j_bambu.out
+#SBATCH --output=slurm%j_3x3.out
 
 ## activate nf-core conda environment
 source /home/preskaa/miniforge3/bin/activate nf-core
