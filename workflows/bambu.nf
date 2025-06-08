@@ -59,12 +59,6 @@ workflow BAMBU_NF {
     else {
         ch_NDR = channel.of(params.NDR)
     }
-    // closure to handle empty NDR
-        def padNDR = { tup ->
-        tup.size() < 3
-            ? [ tup[0], tup[1], [] ]
-            : tup
-    }
     // add NDR to metamap
     def NDRmetamap = { meta, rds, NDR -> 
         def new_meta = meta.clone()
@@ -72,12 +66,12 @@ workflow BAMBU_NF {
         return [new_meta, rds]
     }
     ref_gtf_ch = channel.of(params.gtf)
-    // rc_ch
-    //     .combine(ch_NDR)
-    //     .map(NDRmetamap)
-    //     .combine(ref_gtf_ch)
-    //     .view()
     // run single sample assembly & quant with read classes
+    // if only one sample is provided, run single sample mode
+    if (rc_ch.count() == 1) { 
+        params.single_sample = true
+        params.skip_multisample = true 
+        }
     single_se_ch = Channel.empty()
     if (params.single_sample) {
         // combine read classes and NDR channels
