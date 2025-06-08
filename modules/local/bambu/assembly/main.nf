@@ -1,32 +1,36 @@
 // transcript assembly with bambu
 // NOTE: be warying of errant spaces in the script section! optparse will be unhappy
 process BAMBU_ASSEMBLY {
-    tag "${meta.id}_NDR_${NDR ?: 'DEFAULT'}"
+    tag "${meta.id}_NDR_${meta.NDR}"
     cpus { rds.size() > 20 ? 20 : rds.size() }
     // for testing purposes
     label 'process_high_memory'
-    publishDir "${params.outdir}/${meta.id}", mode: 'copy', overwrite: true
+    publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${meta.NDR}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"
     container "quay.io/shahlab_singularity/bambu:3.10.0beta"
 
     input:
-    tuple val(meta), path(rds, arity: '1..*'), val(NDR), path(ref_gtf)
+    tuple val(meta), path(rds, arity: '1..*'), path(ref_gtf)
     val yieldsize
     path ref_genome
 
     output:
-    tuple val(meta), val(NDR), path("*/se.RData"), emit: se
-    tuple val(meta), val(NDR), path("transcriptome_*"), emit: transcriptome
-    tuple val(meta), val(NDR), path("*/extended_annotations.gtf"), emit: gtf, optional: true
+    tuple val(meta), path("*/se.RData"), emit: se
+    tuple val(meta), path("*/extended_annotations.gtf"), optional: true, emit: gtf
+    tuple val(meta), path("*/counts_gene.txt"), optional: true, emit: gene_counts
+    tuple val(meta), path("*/counts_transcript.txt"), optional: true, emit: transcript_counts
+    tuple val(meta), path("*/CPM_transcript.txt"), optional: true, emit: transcript_cpms
+    tuple val(meta), path("*/fullLengthCounts_transcript.txt"), optional: true, emit: full_len_counts
+    tuple val(meta), path("*/uniqueCounts_transcript.txt"), optional: true, emit: unique_counts
     path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def NDR_args = NDR ? "--NDR=${NDR}" : ""
-    def out_dir = NDR ? "transcriptome_NDR_${NDR}" : "transcriptome_NDR_DEFAULT"
+    def NDR_args = (meta.NDR == "DEFAULT") ? "" : "--NDR=${meta.NDR}"
+    def out_dir = "transcriptome_NDR_${meta.NDR}"
     def prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
     def rds_list = rds.join(',')
@@ -39,7 +43,8 @@ process BAMBU_ASSEMBLY {
         --ref_gtf=${ref_gtf} \\
         --out_dir=${out_dir} \\
         --ncore=${task.cpus} \\
-        ${NDR_args} ${args}
+        ${NDR_args} \\
+        ${args}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')

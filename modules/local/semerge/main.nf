@@ -1,47 +1,41 @@
 // merge summarized experiments
 process SEMERGE {
-    tag "${meta.id}"
+    tag "${meta.id}_NDR_${meta.NDR}"
     label 'process_single'
+    publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${meta.NDR}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"
     container "quay.io/shahlab_singularity/bambu:3.10.0beta"
 
     input:
-    tuple val(meta), path(se, arity: '1..*')
+    tuple val(meta), path(se, stageAs: "temp_merge_se??/*", arity: '1..*')
 
     output:
-    // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    tuple val(meta), path("*.RData"), emit: se
-    // TODO nf-core: List additional required output channels/values here
+    tuple val(meta), path("*/merged_se.RData"), emit: se
+    tuple val(meta), path("*/extended_annotations.gtf"), optional: true, emit: gtf
+    tuple val(meta), path("*/counts_gene.txt"), optional: true, emit: gene_counts
+    tuple val(meta), path("*/counts_transcript.txt"), optional: true, emit: transcript_counts
+    tuple val(meta), path("*/CPM_transcript.txt"), optional: true, emit: transcript_cpms
+    tuple val(meta), path("*/fullLengthCounts_transcript.txt"), optional: true, emit: full_len_counts
+    tuple val(meta), path("*/uniqueCounts_transcript.txt"), optional: true, emit: unique_counts
     path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
+    def out_dir = "transcriptome_NDR_${meta.NDR}"
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def se_list = se.join(',')
     """
-#!/usr/bin/env Rscript
-## load RData function
-loadRData <- function(fileName){
-    load(fileName)
-    get(ls()[ls() != "fileName"])
-}
-rdata_paths <- strsplit(${se_list}, ",")[[1]]
-### combine objects
-se <- loadRData(rdata_paths[1])
-for (i in 2:length(rdata_paths)){
-  se1 <- loadRData(rdata_paths[i])
-  se <- cbind(se, se1)
-}
-### save experiment
-save(se, file = "all_se.RData")
-## write out a small YAML with the R version:
-ver <- R.Version()\$version.string
-out <- sprintf('"%s":\\n    R: "%s"\\n', "${task.process}", ver)
-cat(out, file="versions.yml")
+    mkdir -p ${out_dir}
+    se_merge.R --se=${se_list} --out_dir=${out_dir}
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
+        bambu: \$(Rscript -e "library(bambu); cat(as.character(packageVersion('bambu')))")
+    END_VERSIONS
     """
 
     stub:
