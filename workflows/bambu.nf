@@ -122,10 +122,12 @@ workflow BAMBU_NF {
         }
     }
     // filter for detected transcripts
-    all_se_ch = merge_se_ch.mix(single_se_ch)
-    // all_se_ch.view()
-    BAMBU_FILTER(all_se_ch)
-    ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
+    if (params.single_sample || params.multisample_quant) {
+        all_se_ch = merge_se_ch.mix(single_se_ch)
+        BAMBU_FILTER(all_se_ch)
+        ch_versions = ch_versions.mix(BAMBU_FILTER.out.versions)
+    }
+
     // collect versions
     softwareVersionsToYAML(ch_versions)
         .collectFile(
