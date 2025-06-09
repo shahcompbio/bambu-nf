@@ -2,7 +2,17 @@
 // NOTE: be warying of errant spaces in the script section! optparse will be unhappy
 process BAMBU_ASSEMBLY {
     tag "${meta.id}_NDR_${meta.NDR}"
-    cpus { rds.size() > 20 ? 20 : rds.size() }
+    cpus {
+        // If rds is null → 1 core
+        if (rds == null) {
+            return 1
+        }
+        // If rds is a collection → .size(), else 1
+        def count = rds instanceof Collection ? rds.size() : 1
+        // cap at 20
+        return count > 20 ? 20 : count
+    }
+
     // for testing purposes
     label 'process_high_memory'
     publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${meta.NDR}", mode: 'copy', overwrite: true
@@ -29,7 +39,7 @@ process BAMBU_ASSEMBLY {
     task.ext.when == null || task.ext.when
 
     script:
-    def NDR_args = (meta.NDR == "DEFAULT") ? "" : "--NDR=${meta.NDR}"
+    def NDR_args = meta.NDR == "DEFAULT" ? "" : "--NDR=${meta.NDR}"
     def out_dir = "transcriptome_NDR_${meta.NDR}"
     def prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
