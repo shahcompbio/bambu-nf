@@ -2,18 +2,6 @@
 // NOTE: be warying of errant spaces in the script section! optparse will be unhappy
 process BAMBU_ASSEMBLY {
     tag "${meta.id}_NDR_${meta.NDR}"
-    cpus {
-        // If rds is null → 1 core
-        if (rds == null) {
-            return 1
-        }
-        // If rds is a collection → .size(), else 1
-        def count = rds instanceof Collection ? rds.size() : 1
-        // cap at 20
-        return count > 20 ? 20 : count
-    }
-
-    // for testing purposes
     label 'process_high_memory'
     publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${meta.NDR}", mode: 'copy', overwrite: true
 
