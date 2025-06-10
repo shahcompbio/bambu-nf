@@ -18,9 +18,7 @@ option_list = list(
   make_option("--ref_genome", type="character", default=NULL, 
               help="reference genome", metavar="character"),
   make_option("--ref_gtf", type="character", default=NULL, 
-              help="reference gtf", metavar="character"),
-  make_option("--out_dir", type="character", default=NULL, 
-              help="output dir", metavar="character")
+              help="reference gtf", metavar="character")
 );
  
 opt_parser = OptionParser(option_list=option_list);
@@ -38,12 +36,10 @@ se <- bambu(reads = rds, annotations = annotations, ncore = opt$ncore,
             yieldSize = opt$yieldsize, lowMemory=TRUE)
 ## write outputs to gtf and expression level files
 if (opt$quant){
-  writeBambuOutput(se, path = opt$out_dir)
+  writeBambuOutput(se, path = "./")
 } else {
-  gtf_out <- file.path(opt$out_dir, "extended_annotations.gtf")
-  writeToGTF(se, file = gtf_out)
+  writeToGTF(se, file = "./extended_annotations.gtf")
 }
 #
 ## let's also save the summarized experiment object to play with later ...
-se_out <- sprintf("%s/se.RData", opt$out_dir)
-save(se, file = se_out)
+save(se, file = "./se.RData")

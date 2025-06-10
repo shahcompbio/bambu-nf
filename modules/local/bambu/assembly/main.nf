@@ -28,18 +28,15 @@ process BAMBU_ASSEMBLY {
 
     script:
     def NDR_args = meta.NDR == "DEFAULT" ? "" : "--NDR=${meta.NDR}"
-    def out_dir = "transcriptome_NDR_${meta.NDR}"
     def prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
     def rds_list = rds.join(',')
     """
-    mkdir -p ${out_dir}
     transcript_assembly.R \\
         --rds=${rds_list} \\
         --yieldsize=${yieldsize} \\
         --ref_genome=${ref_genome} \\
         --ref_gtf=${ref_gtf} \\
-        --out_dir=${out_dir} \\
         --ncore=${task.cpus} \\
         ${NDR_args} \\
         ${args}
