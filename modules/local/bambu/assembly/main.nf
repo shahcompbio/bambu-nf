@@ -14,13 +14,13 @@ process BAMBU_ASSEMBLY {
     path ref_genome
 
     output:
-    tuple val(meta), path("*/se.RData"), emit: se
-    tuple val(meta), path("*/extended_annotations.gtf"), optional: true, emit: gtf
-    tuple val(meta), path("*/counts_gene.txt"), optional: true, emit: gene_counts
-    tuple val(meta), path("*/counts_transcript.txt"), optional: true, emit: transcript_counts
-    tuple val(meta), path("*/CPM_transcript.txt"), optional: true, emit: transcript_cpms
-    tuple val(meta), path("*/fullLengthCounts_transcript.txt"), optional: true, emit: full_len_counts
-    tuple val(meta), path("*/uniqueCounts_transcript.txt"), optional: true, emit: unique_counts
+    tuple val(meta), path("se.RData"), emit: se
+    tuple val(meta), path("extended_annotations.gtf"), optional: true, emit: gtf
+    tuple val(meta), path("counts_gene.txt"), optional: true, emit: gene_counts
+    tuple val(meta), path("counts_transcript.txt"), optional: true, emit: transcript_counts
+    tuple val(meta), path("CPM_transcript.txt"), optional: true, emit: transcript_cpms
+    tuple val(meta), path("fullLengthCounts_transcript.txt"), optional: true, emit: full_len_counts
+    tuple val(meta), path("uniqueCounts_transcript.txt"), optional: true, emit: unique_counts
     path "versions.yml", emit: versions
 
     when:

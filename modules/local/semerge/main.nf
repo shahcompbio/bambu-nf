@@ -11,26 +11,24 @@ process SEMERGE {
     tuple val(meta), path(se, stageAs: "temp_merge_se??/*", arity: '1..*')
 
     output:
-    tuple val(meta), path("*/merged_se.RData"), emit: se
-    tuple val(meta), path("*/extended_annotations.gtf"), optional: true, emit: gtf
-    tuple val(meta), path("*/counts_gene.txt"), optional: true, emit: gene_counts
-    tuple val(meta), path("*/counts_transcript.txt"), optional: true, emit: transcript_counts
-    tuple val(meta), path("*/CPM_transcript.txt"), optional: true, emit: transcript_cpms
-    tuple val(meta), path("*/fullLengthCounts_transcript.txt"), optional: true, emit: full_len_counts
-    tuple val(meta), path("*/uniqueCounts_transcript.txt"), optional: true, emit: unique_counts
+    tuple val(meta), path("merged_se.RData"), emit: se
+    tuple val(meta), path("extended_annotations.gtf"), optional: true, emit: gtf
+    tuple val(meta), path("counts_gene.txt"), optional: true, emit: gene_counts
+    tuple val(meta), path("counts_transcript.txt"), optional: true, emit: transcript_counts
+    tuple val(meta), path("CPM_transcript.txt"), optional: true, emit: transcript_cpms
+    tuple val(meta), path("fullLengthCounts_transcript.txt"), optional: true, emit: full_len_counts
+    tuple val(meta), path("uniqueCounts_transcript.txt"), optional: true, emit: unique_counts
     path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
     script:
-    def out_dir = "transcriptome_NDR_${meta.NDR}"
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
     def se_list = se.join(',')
     """
-    mkdir -p ${out_dir}
-    se_merge.R --se=${se_list} --out_dir=${out_dir}
+    se_merge.R --se=${se_list}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
