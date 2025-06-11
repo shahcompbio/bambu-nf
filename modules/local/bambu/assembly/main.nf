@@ -21,6 +21,7 @@ process BAMBU_ASSEMBLY {
     tuple val(meta), path("CPM_transcript.txt"), optional: true, emit: transcript_cpms
     tuple val(meta), path("fullLengthCounts_transcript.txt"), optional: true, emit: full_len_counts
     tuple val(meta), path("uniqueCounts_transcript.txt"), optional: true, emit: unique_counts
+    tuple val(meta), path("bambu_assembly.log"), emit: log
     path "versions.yml", emit: versions
 
     when:
@@ -39,7 +40,7 @@ process BAMBU_ASSEMBLY {
         --ref_gtf=${ref_gtf} \\
         --ncore=${task.cpus} \\
         ${NDR_args} \\
-        ${args}
+        ${args} 2>&1 | tee bambu_assembly.log
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         r-base: \$(echo \$(R --version 2>&1) | sed 's/^.*R version //; s/ .*\$//')
