@@ -18,7 +18,9 @@ option_list = list(
   make_option("--ref_genome", type="character", default=NULL, 
               help="reference genome", metavar="character"),
   make_option("--ref_gtf", type="character", default=NULL, 
-              help="reference gtf", metavar="character")
+              help="reference gtf", metavar="character"),
+  make_option("--lowMemory", type="logical", default=TRUE, 
+            help="low memory mode", metavar="logical")            
 );
  
 opt_parser = OptionParser(option_list=option_list);
@@ -33,7 +35,7 @@ sprintf("processing %s read classes", length(rds))
 se <- bambu(reads = rds, annotations = annotations, ncore = opt$ncore,
             genome = opt$ref_genome, NDR = opt$NDR, verbose=TRUE,
             quant = opt$quant, discovery=opt$discovery, 
-            yieldSize = opt$yieldsize, lowMemory=TRUE)
+            yieldSize = opt$yieldsize, lowMemory=opt$lowMemory)
 ## write outputs to gtf and expression level files
 if (opt$quant){
   writeBambuOutput(se, path = "./")

@@ -32,10 +32,11 @@ process BAMBU_ASSEMBLY {
     def prefix = task.ext.prefix ?: "${meta.id}"
     def args = task.ext.args ?: ''
     def rds_list = rds.join(',')
+    def yieldSize = task.ext.yieldsize ?: yieldsize
     """
     transcript_assembly.R \\
         --rds=${rds_list} \\
-        --yieldsize=${yieldsize} \\
+        --yieldsize=${yieldSize} \\
         --ref_genome=${ref_genome} \\
         --ref_gtf=${ref_gtf} \\
         --ncore=${task.cpus} \\
