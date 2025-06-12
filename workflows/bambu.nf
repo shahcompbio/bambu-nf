@@ -133,15 +133,23 @@ workflow BAMBU_NF {
             .combine(ref_gtf_ch)
         BAMBU_QUANT(input_quant_ch, [], genome)
         ch_versions = ch_versions.mix(BAMBU_QUANT.out.versions)
-        // collect all summarized experiments for each NDR
-        se_quant_ch = BAMBU_QUANT.out.se
-            .map { meta, se ->
-                def fmeta = meta.clone()
-                fmeta.id = "merge"
-                return [fmeta, se]
+        // This works - branching based on channel contents
+        BAMBU_QUANT.out.se
+            .toList()
+            .branch {
+                multiple: it.size() > 1
+                single: it.size() == 1
             }
-            .groupTuple(by: 0)
-        if (se_quant_ch.size() > 1) {
+            .set { se_branched }
+        if (multiple) {
+            // collect all summarized experiments
+            se_quant_ch = BAMBU_QUANT.out.se
+                .map { meta, se ->
+                    def fmeta = meta.clone()
+                    fmeta.id = "merge"
+                    return [fmeta, se]
+                }
+                .groupTuple(by: 0)
             SEQUANT_MERGE(se_quant_ch)
             quantonly_se_ch = SEQUANT_MERGE.out.se
             ch_versions = ch_versions.mix(SEQUANT_MERGE.out.versions)
