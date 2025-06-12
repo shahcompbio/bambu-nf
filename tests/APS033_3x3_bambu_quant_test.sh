@@ -27,7 +27,7 @@ cd ${outdir}
 
 # export NXF_SINGULARITY_OPTS="--bind /data1/shahs3:/data1/shahs3"
 
-nextflow run ${pipelinedir}/main.nf \
+nextflow run shahcompbio/bambu-nf -r master -latest \
     -profile singularity,test \
     -work-dir ${outdir}/work \
     --outdir ${outdir} \
