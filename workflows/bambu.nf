@@ -126,38 +126,38 @@ workflow BAMBU_NF {
     }
     // run quantification only
     quantonly_se_ch = Channel.empty()
-    if (params.quant_only) {
-        input_quant_ch = bam_ch
-            .combine(ch_NDR)
-            .map(NDRmetamap)
-            .combine(ref_gtf_ch)
-        BAMBU_QUANT(input_quant_ch, [], genome)
-        ch_versions = ch_versions.mix(BAMBU_QUANT.out.versions)
-        // This works - branching based on channel contents
-        BAMBU_QUANT.out.se
-            .toList()
-            .branch {
-                multiple: it.size() > 1
-                single: it.size() == 1
-            }
-            .set { se_branched }
-        if (multiple) {
-            // collect all summarized experiments
-            se_quant_ch = BAMBU_QUANT.out.se
-                .map { meta, se ->
-                    def fmeta = meta.clone()
-                    fmeta.id = "merge"
-                    return [fmeta, se]
-                }
-                .groupTuple(by: 0)
-            SEQUANT_MERGE(se_quant_ch)
-            quantonly_se_ch = SEQUANT_MERGE.out.se
-            ch_versions = ch_versions.mix(SEQUANT_MERGE.out.versions)
-        }
-        else {
-            quantonly_se_ch = BAMBU_QUANT.out.se
-        }
-    }
+    // if (params.quant_only) {
+    //     input_quant_ch = bam_ch
+    //         .combine(ch_NDR)
+    //         .map(NDRmetamap)
+    //         .combine(ref_gtf_ch)
+    //     BAMBU_QUANT(input_quant_ch, [], genome)
+    //     ch_versions = ch_versions.mix(BAMBU_QUANT.out.versions)
+    //     // This works - branching based on channel contents
+    //     BAMBU_QUANT.out.se
+    //         .toList()
+    //         .branch {
+    //             multiple: it.size() > 1
+    //             single: it.size() == 1
+    //         }
+    //         .set { se_branched }
+    //     if (multiple) {
+    //         // collect all summarized experiments
+    //         se_quant_ch = BAMBU_QUANT.out.se
+    //             .map { meta, se ->
+    //                 def fmeta = meta.clone()
+    //                 fmeta.id = "merge"
+    //                 return [fmeta, se]
+    //             }
+    //             .groupTuple(by: 0)
+    //         SEQUANT_MERGE(se_quant_ch)
+    //         quantonly_se_ch = SEQUANT_MERGE.out.se
+    //         ch_versions = ch_versions.mix(SEQUANT_MERGE.out.versions)
+    //     }
+    //     else {
+    //         quantonly_se_ch = BAMBU_QUANT.out.se
+    //     }
+    // }
     // filter for detected transcripts
     if (params.single_sample || params.multisample_quant) {
         all_se_ch = merge_se_ch.mix(single_se_ch, quantonly_se_ch)
