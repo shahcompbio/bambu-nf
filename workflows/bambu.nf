@@ -87,7 +87,7 @@ workflow BAMBU_NF {
     // run multisample mode; assembly then quant
     merge_se_ch = Channel.empty()
     quantonly_se_ch = Channel.empty()
-    if (!params.skip_multisample) {
+    if (!params.skip_multisample && !params.quant_only) {
         merge_ch = rc_ch
             .collect { meta, rds -> rds }
             .map { rds -> [["id": "merge"], rds] }
