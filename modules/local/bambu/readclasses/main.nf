@@ -6,7 +6,7 @@ process BAMBU_READCLASSES {
     publishDir "${params.outdir}/${meta.id}", mode: 'copy', overwrite: true
 
     conda "${moduleDir}/environment.yml"
-    container "quay.io/shahlab_singularity/bambu:hongyhong_fix"
+    container "quay.io/shahlab_singularity/bambu:HongYhong_fix"
 
     input:
     tuple val(meta), path(bam)
