@@ -38,7 +38,7 @@ process BAMBU_ASSEMBLY {
         --rds=${rds_list} \\
         --yieldsize=${yieldSize} \\
         --ref_genome=${ref_genome} \\
-        --ref_gtf=${ref_gtf} \\
+        --ref_gtf=reference.gtf \\
         --ncore=${task.cpus} \\
         ${NDR_args} \\
         ${args} 2>&1 | tee bambu_assembly.log
