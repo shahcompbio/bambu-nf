@@ -9,7 +9,7 @@ process BAMBU_ASSEMBLY {
     container "quay.io/shahlab_singularity/bambu:3.10.0beta"
 
     input:
-    tuple val(meta), path(rds, arity: '1..*'), path(ref_gtf)
+    tuple val(meta), path(rds, arity: '1..*'), path(ref_gtf, stageAs: 'reference.gtf')
     val yieldsize
     path ref_genome
 
