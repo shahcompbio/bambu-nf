@@ -27,11 +27,6 @@ workflow BAMBU_NF {
     ch_samplesheet // channel: samplesheet read in from --input
 
     main:
-    // shorten param names called by workflows for readability
-    def yield = params.yieldsize
-    def genome = params.fasta
-    def gtf = params.gtf
-    def merge_quant = params.multisample_quant
     // begin workflow
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
@@ -79,7 +74,7 @@ workflow BAMBU_NF {
             .combine(ch_NDR)
             .map(NDRmetamap)
             .combine(ref_gtf_ch)
-        BAMBU(bambu_input_ch, yield, genome)
+        BAMBU(bambu_input_ch, params.yieldsize, params.fasta)
         single_se_ch = BAMBU.out.se
         ch_versions = ch_versions.mix(BAMBU.out.versions)
     }
@@ -93,7 +88,7 @@ workflow BAMBU_NF {
             .map(NDRmetamap)
             .combine(ref_gtf_ch)
         // merge_input_ch.view()
-        BAMBU_MERGE(merge_input_ch, yield, genome)
+        BAMBU_MERGE(merge_input_ch, params.yieldsize, params.fasta)
         ch_versions = ch_versions.mix(BAMBU_MERGE.out.versions)
         // run multisample quantification
         if (params.multisample_quant) {
@@ -106,7 +101,7 @@ workflow BAMBU_NF {
                     return [meta, bam, ext_gtf]
                 }
             // merge_quant_ch.view()
-            BAMBU_MERGE_QUANT(merge_quant_ch, yield, genome)
+            BAMBU_MERGE_QUANT(merge_quant_ch, params.yieldsize, params.fasta)
             ch_versions = ch_versions.mix(BAMBU_MERGE_QUANT.out.versions)
             // collect all summarized experiments for each NDR
             se_ch = BAMBU_MERGE_QUANT.out.se
@@ -127,7 +122,7 @@ workflow BAMBU_NF {
             .combine(ch_NDR)
             .map(NDRmetamap)
             .combine(ref_gtf_ch)
-        BAMBU_QUANT(input_quant_ch, [], genome)
+        BAMBU_QUANT(input_quant_ch, [], params.fasta)
         ch_versions = ch_versions.mix(BAMBU_QUANT.out.versions)
         // This works - branching based on channel contents
         BAMBU_QUANT.out.se
@@ -136,7 +131,6 @@ workflow BAMBU_NF {
                 multiple: it.size() > 1
                 single: it.size() == 1
             }
-            .set { se_branched }
 
         if (!params.skip_multisample) {
             // collect all summarized experiments
