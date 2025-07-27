@@ -9,6 +9,14 @@ report_section_order:
   "shahcompbio-bambu-nf-summary":
     order: -1002
 
-export_plots: true
+export_plots: false
 
 disable_version_detection: true
+
+log_filesize_limit: 2000000000
+
+extra_fn_clean_exts:
+  - type: remove
+    pattern: .NanoStats
+  - type: remove
+    pattern: .filtered

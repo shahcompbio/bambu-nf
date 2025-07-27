@@ -5,15 +5,15 @@ include { BAMBU_READCLASSES             } from '../../../modules/local/bambu/rea
 
 workflow PREPROCESS_READS {
     take:
-    ch_samplesheet   // channel: [ val(meta), [ bam, bai, rcFile ] ]
-    filter_reads     // boolean; filter reads on mapq and read length
-    filter_acc_reads // boolean; filter reads on accessory chromosomes
+    ch_samplesheet    // channel: [ val(meta), [ bam, bai, rcFile ] ]
+    skip_filter_reads // boolean; filter reads on mapq and read length
+    filter_acc_reads  // boolean; filter reads on accessory chromosomes
 
     main:
 
     ch_versions = Channel.empty()
 
-    if (filter_reads) {
+    if (!skip_filter_reads) {
         ch_filtered = FILTER_READS(
             ch_samplesheet,
             [[], []],

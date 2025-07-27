@@ -4,6 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { PREPROCESS_READS                    } from '../subworkflows/local/preprocess_reads/main'
+include { QC                                  } from '../subworkflows/local/qc/main'
 include { BAMBU_ASSEMBLY as BAMBU             } from '../modules/local/bambu/assembly/main'
 include { BAMBU_ASSEMBLY as BAMBU_MERGE       } from '../modules/local/bambu/assembly/main'
 include { BAMBU_ASSEMBLY as BAMBU_MERGE_QUANT } from '../modules/local/bambu/assembly/main'
@@ -33,7 +34,7 @@ workflow BAMBU_NF {
     // preprocess reads by filtering and creating read classes
     if (!params.skip_preprocessing) {
         input_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, bam, bai) }
-        PREPROCESS_READS(input_ch, params.filter_reads, params.filter_acc_reads)
+        PREPROCESS_READS(input_ch, params.skip_filter_reads, params.filter_acc_reads)
         rc_ch = PREPROCESS_READS.out.reads
         bam_ch = PREPROCESS_READS.out.bam
         ch_versions = ch_versions.mix(PREPROCESS_READS.out.versions)
@@ -41,6 +42,12 @@ workflow BAMBU_NF {
     else {
         rc_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, rds) }
         bam_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, bam) }
+    }
+    // qc samples
+    if (!params.skip_qc) {
+        QC(bam_ch)
+        ch_versions = ch_versions.mix(QC.out.versions)
+        ch_multiqc_files = ch_multiqc_files.mix(QC.out.multiqc)
     }
     // perform assembly & quantification with bambu
     // make an NDR channel
