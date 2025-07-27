@@ -30,9 +30,7 @@ workflow BAMBU_NF {
     // begin workflow
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-    //
-    // MODULE: Run samtools view to filter bam files for reads aligned to accessory chromosomes
-    //
+    // preprocess reads by filtering and creating read classes
     if (!params.skip_preprocessing) {
         input_ch = ch_samplesheet.map { meta, bam, bai, rds -> tuple(meta, bam, bai) }
         PREPROCESS_READS(input_ch, params.filter_reads, params.filter_acc_reads)
