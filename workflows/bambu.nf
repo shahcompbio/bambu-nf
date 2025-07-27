@@ -67,14 +67,13 @@ workflow BAMBU_NF {
         return [new_meta, rds]
     }
     ref_gtf_ch = channel.of(params.gtf)
-    // run single sample assembly & quant with read classes
-    // if only one sample is provided, run single sample mode
-    if (rc_ch.count() == 1) {
-        params.single_sample = true
-        params.skip_multisample = true
-    }
     single_se_ch = Channel.empty()
-    if (params.single_sample) {
+    merge_se_ch = Channel.empty()
+    quantonly_se_ch = Channel.empty()
+    // run single sample assembly & quant with read classes
+    // count samples; if only one sample is provided, run single sample mode
+    sample_count = countSamples(params.input)
+    if (sample_count == 1 || params.single_sample) {
         // combine read classes and NDR channels
         bambu_input_ch = rc_ch
             .combine(ch_NDR)
@@ -84,10 +83,8 @@ workflow BAMBU_NF {
         single_se_ch = BAMBU.out.se
         ch_versions = ch_versions.mix(BAMBU.out.versions)
     }
-    // run multisample mode; assembly then quant
-    merge_se_ch = Channel.empty()
-    quantonly_se_ch = Channel.empty()
-    if (!params.skip_multisample && !params.quant_only) {
+    else if (!params.skip_multisample && !params.quant_only) {
+        // run multisample mode; assembly then quant
         merge_ch = rc_ch
             .collect { meta, rds -> rds }
             .map { rds -> [["id": "merge"], rds] }
@@ -124,9 +121,8 @@ workflow BAMBU_NF {
             ch_versions = ch_versions.mix(SEMERGE.out.versions)
         }
     }
-    // run quantification only
-    quantonly_se_ch = Channel.empty()
-    if (params.quant_only) {
+    else {
+        // run bambu in quantification mode only
         input_quant_ch = bam_ch
             .combine(ch_NDR)
             .map(NDRmetamap)
@@ -226,4 +222,16 @@ workflow BAMBU_NF {
     emit:
     multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions // channel: [ path(versions.yml) ]
+}
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    FUNCTIONS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+def countSamples(input) {
+    def lines = file(input).readLines()
+    def sample_count = lines.size() - 1
+    println("1 sample detected; switching to single sample mode")
+    return sample_count
 }
