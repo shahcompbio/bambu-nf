@@ -4,7 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { PREPROCESS_READS                    } from '../subworkflows/local/preprocess_reads/main'
-include { QC                                  } from '../subworkflows/local/qc/main'
+include { NANOPLOT                            } from '../modules/nf-core/nanoplot/main'
 include { BAMBU_ASSEMBLY as BAMBU             } from '../modules/local/bambu/assembly/main'
 include { BAMBU_ASSEMBLY as BAMBU_MERGE       } from '../modules/local/bambu/assembly/main'
 include { BAMBU_ASSEMBLY as BAMBU_MERGE_QUANT } from '../modules/local/bambu/assembly/main'
@@ -45,9 +45,9 @@ workflow BAMBU_NF {
     }
     // qc samples
     if (!params.skip_qc) {
-        QC(bam_ch)
-        ch_versions = ch_versions.mix(QC.out.versions)
-        ch_multiqc_files = ch_multiqc_files.mix(QC.out.multiqc)
+        NANOPLOT(bam_ch)
+        ch_multiqc_files = ch_multiqc_files.mix(NANOPLOT.out.txt.collect { it[1] })
+        ch_versions = ch_versions.mix(NANOPLOT.out.versions)
     }
     // perform assembly & quantification with bambu
     // make an NDR channel
