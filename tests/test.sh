@@ -12,4 +12,5 @@ nextflow run ${pipelinedir}/main.nf \
     -work-dir ${outdir}/work \
     --outdir ${outdir} \
     --single_sample \
+    --NDR 0.1 \
     -resume

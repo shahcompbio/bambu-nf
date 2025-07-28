@@ -1,6 +1,6 @@
 // filter for full-length isoforms
 process BAMBU_FILTER {
-    tag "${meta.id}"
+    tag "${meta.id}_NDR_${meta.NDR}"
     label 'process_low'
     publishDir "${params.outdir}/${meta.id}/transcriptome_NDR_${meta.NDR}", mode: 'copy', overwrite: true
 
@@ -20,7 +20,7 @@ process BAMBU_FILTER {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def merge_args = (meta.id == "merge") ? "--merge=TRUE" : ""
+    def merge_args = meta.id == "merge" ? "--merge=TRUE" : ""
     """
     bambu_filter.R --se=${se} ${merge_args}
     cat <<-END_VERSIONS > versions.yml
